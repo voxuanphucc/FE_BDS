@@ -243,7 +243,7 @@ const AddPostPage: React.FC = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer eyJhbGciOiJIUzUxMiJ9.eyJ1c2VySWQiOiIyZjU0NzNhYi0xZWNjLTRjMTMtODMzNi05ZjcyNTlmYWNhZTIiLCJ1c2VybmFtZSI6IkxlIFh1YW4gRHVuZyIsImlhdCI6MTc1NDg5ODY3MSwiZXhwIjoxNzU0OTAyMjcxfQ.2z-LoXz8ofTFIxLLY_IbJBcMMjblXQwkxAoYwnW31yxKFZWeVqsuBpbQLqWton3X4zcfxT4cQcyCXTLOBhYAOg`
+                    'Authorization': `Bearer ${localStorage.getItem("authToken")}`
                 },
                 body: JSON.stringify(postData)
             });

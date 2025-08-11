@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { publicRoutes } from './publicRoutes';
+import { Link } from "react-router-dom";
 import { privateRoutes } from './privateRoutes';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
@@ -47,12 +48,15 @@ const AppRouter: React.FC = () => {
                   <div className="text-center">
                     <h1 className="text-4xl font-bold text-gray-900 mb-4">404</h1>
                     <p className="text-gray-600 mb-4">Page not found</p>
-                    <a
-                      href="/"
+
+
+                    <Link
+                      to="/"
                       className="text-blue-600 hover:text-blue-800 underline"
                     >
                       Go back home
-                    </a>
+                    </Link>
+
                   </div>
                 </div>
               }
