@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Upload, X, Home, MapPin, DollarSign, Calendar, Ruler } from 'lucide-react';
+import { Upload, X, Home, MapPin, DollarSign, Calendar, Ruler, Star } from 'lucide-react';
 
 interface PostFormData {
     // Post info
+    postRank: string;
     postType: string;
+    thumbnailUrl: string;
     realEstateType: string;
     title: string;
     content: string;
-    status: string;
 
     // PostDetail info
     price: number | '';
@@ -20,24 +21,26 @@ interface PostFormData {
     bedrooms: number | '';
     bathrooms: number | '';
     floors: number | '';
-    yearBuilt: string;
+    yearBuilt: string; // Keep as string for date input, will convert to LocalDate
     diningRoom: boolean;
     kitchen: boolean;
     rooftop: boolean;
     carPark: boolean;
     owner: boolean;
 
-    // Images - now storing public_ids instead of URLs
+    // Images - storing public_ids and URLs
     imagePublicIds: string[];
+    imageUrls: string[];
 }
 
 const AddPostPage: React.FC = () => {
     const [formData, setFormData] = useState<PostFormData>({
+        postRank: 'COPPER',
         postType: '',
+        thumbnailUrl: '',
         realEstateType: '',
         title: '',
         content: '',
-        status: 'ACTIVE',
         price: '',
         direction: '',
         square: '',
@@ -54,7 +57,8 @@ const AddPostPage: React.FC = () => {
         rooftop: false,
         carPark: false,
         owner: false,
-        imagePublicIds: []
+        imagePublicIds: [],
+        imageUrls: []
     });
 
     const [uploadingImages, setUploadingImages] = useState<boolean>(false);
@@ -64,7 +68,15 @@ const AddPostPage: React.FC = () => {
     const cloudName = 'dt2hiwsge';
     const uploadPreset = 'BDSMOI';
 
-    // Simplified Cloudinary upload function based on HTML example
+    // Post rank options
+    const postRankOptions = [
+        { value: 'COPPER', label: '🥉 Đồng - Miễn phí', description: 'Tin thường, chờ duyệt' },
+        { value: 'SILVER', label: '🥈 Bạc - 50k/tuần', description: 'Hiển thị ưu tiên' },
+        { value: 'GOLD', label: '🥇 Vàng - 100k/tuần', description: 'Hiển thị nổi bật' },
+        { value: 'DIAMOND', label: '💎 Kim cương - 200k/tuần', description: 'Hiển thị VIP' }
+    ];
+
+    // Simplified Cloudinary upload function
     const uploadToCloudinary = async (file: File): Promise<{ publicId: string; secureUrl: string }> => {
         const formData = new FormData();
         formData.append('file', file);
@@ -120,9 +132,15 @@ const AddPostPage: React.FC = () => {
             const uploadPromises = validFiles.map(file => uploadToCloudinary(file));
             const uploadResults = await Promise.all(uploadPromises);
 
+            const newPublicIds = uploadResults.map(result => result.publicId);
+            const newImageUrls = uploadResults.map(result => result.secureUrl);
+
             setFormData(prev => ({
                 ...prev,
-                imagePublicIds: [...prev.imagePublicIds, ...uploadResults.map(result => result.publicId)]
+                imagePublicIds: [...prev.imagePublicIds, ...newPublicIds],
+                imageUrls: [...prev.imageUrls, ...newImageUrls],
+                // Set first image as thumbnail if not set
+                thumbnailUrl: prev.thumbnailUrl || newImageUrls[0] || ''
             }));
 
             alert(`Đã upload thành công ${uploadResults.length} ảnh!`);
@@ -135,9 +153,16 @@ const AddPostPage: React.FC = () => {
     };
 
     const removeImage = (index: number) => {
+        const removedImageUrl = formData.imageUrls[index];
+        const newImageUrls = formData.imageUrls.filter((_, i) => i !== index);
+        const newPublicIds = formData.imagePublicIds.filter((_, i) => i !== index);
+
         setFormData(prev => ({
             ...prev,
-            imagePublicIds: prev.imagePublicIds.filter((_, i) => i !== index)
+            imagePublicIds: newPublicIds,
+            imageUrls: newImageUrls,
+            // Update thumbnail if the removed image was the thumbnail
+            thumbnailUrl: prev.thumbnailUrl === removedImageUrl ? (newImageUrls[0] || '') : prev.thumbnailUrl
         }));
     };
 
@@ -147,9 +172,9 @@ const AddPostPage: React.FC = () => {
         const transformations = Object.entries({
             f: 'auto',
             q: 'auto',
-            w: 400,
-            h: 300,
-            c: 'fill',
+            w: 800,
+            h: 800,
+            c: 'limit',
             ...options
         }).map(([key, value]) => `${key}_${value}`).join(',');
 
@@ -179,22 +204,18 @@ const AddPostPage: React.FC = () => {
                 return;
             }
 
-            // Generate URLs from public IDs for API
-            const imageUrls = formData.imagePublicIds.map(publicId =>
-                getCloudinaryUrl(publicId, { w: 1200, h: 800, c: 'limit' })
-            );
-
-            // Prepare data to match PostWithDetailDTO structure
+            // Prepare data to match PostCreationDTO structure
             postData = {
                 // Post info
+                postRank: formData.postRank,
                 postType: formData.postType,
+                thumbnailUrl: formData.thumbnailUrl,
                 realEstateType: formData.realEstateType,
                 title: formData.title,
                 content: formData.content,
-                status: formData.status,
 
-                // PostDetail info - convert empty strings to null
-                price: formData.price,
+                // PostDetail info - convert empty strings to null and handle data types
+                price: formData.price ? Number(formData.price) : null,
                 direction: formData.direction || null,
                 square: formData.square === '' ? null : Number(formData.square),
                 length: formData.length === '' ? null : Number(formData.length),
@@ -204,7 +225,7 @@ const AddPostPage: React.FC = () => {
                 bedrooms: formData.bedrooms === '' ? null : Number(formData.bedrooms),
                 bathrooms: formData.bathrooms === '' ? null : Number(formData.bathrooms),
                 floors: formData.floors === '' ? null : Number(formData.floors),
-                yearBuilt: formData.yearBuilt || null,
+                yearBuilt: formData.yearBuilt || null, // Backend expects LocalDate, will be parsed from string
                 diningRoom: formData.diningRoom,
                 kitchen: formData.kitchen,
                 rooftop: formData.rooftop,
@@ -212,8 +233,7 @@ const AddPostPage: React.FC = () => {
                 owner: formData.owner,
 
                 // Images
-                imageUrls: imageUrls,
-                imagePublicIds: formData.imagePublicIds // Also send public IDs for future reference
+                imageUrls: formData.imageUrls
             };
 
             console.log('Submitting post data:', postData);
@@ -223,8 +243,7 @@ const AddPostPage: React.FC = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Add authorization header if needed
-                    // 'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer eyJhbGciOiJIUzUxMiJ9.eyJ1c2VySWQiOiIyZjU0NzNhYi0xZWNjLTRjMTMtODMzNi05ZjcyNTlmYWNhZTIiLCJ1c2VybmFtZSI6IkxlIFh1YW4gRHVuZyIsImlhdCI6MTc1NDg5ODY3MSwiZXhwIjoxNzU0OTAyMjcxfQ.2z-LoXz8ofTFIxLLY_IbJBcMMjblXQwkxAoYwnW31yxKFZWeVqsuBpbQLqWton3X4zcfxT4cQcyCXTLOBhYAOg`
                 },
                 body: JSON.stringify(postData)
             });
@@ -239,11 +258,12 @@ const AddPostPage: React.FC = () => {
 
             // Reset form after successful submission
             setFormData({
+                postRank: 'COPPER',
                 postType: '',
+                thumbnailUrl: '',
                 realEstateType: '',
                 title: '',
                 content: '',
-                status: 'ACTIVE',
                 price: '',
                 direction: '',
                 square: '',
@@ -260,12 +280,13 @@ const AddPostPage: React.FC = () => {
                 rooftop: false,
                 carPark: false,
                 owner: false,
-                imagePublicIds: []
+                imagePublicIds: [],
+                imageUrls: []
             });
 
         } catch (error) {
             console.error('Error submitting post:', error);
-            console.log(postData);
+            console.log('Failed data:', postData);
             alert(`Có lỗi xảy ra khi đăng tin: ${error}`);
         } finally {
             setIsSubmitting(false);
@@ -274,11 +295,12 @@ const AddPostPage: React.FC = () => {
 
     const resetForm = () => {
         setFormData({
+            postRank: 'COPPER',
             postType: '',
+            thumbnailUrl: '',
             realEstateType: '',
             title: '',
             content: '',
-            status: 'ACTIVE',
             price: '',
             direction: '',
             square: '',
@@ -295,7 +317,8 @@ const AddPostPage: React.FC = () => {
             rooftop: false,
             carPark: false,
             owner: false,
-            imagePublicIds: []
+            imagePublicIds: [],
+            imageUrls: []
         });
     };
 
@@ -315,6 +338,38 @@ const AddPostPage: React.FC = () => {
                     </div>
 
                     <div className="p-8 space-y-10">
+                        {/* Post Rank Selection */}
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-3 pb-3 border-b-2 border-gray-100">
+                                <div className="p-2 bg-yellow-100 rounded-lg">
+                                    <Star className="h-5 w-5 text-yellow-600" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-gray-800">Gói tin đăng</h2>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                {postRankOptions.map((option) => (
+                                    <label key={option.value} className="cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="postRank"
+                                            value={option.value}
+                                            checked={formData.postRank === option.value}
+                                            onChange={handleInputChange}
+                                            className="sr-only"
+                                        />
+                                        <div className={`p-4 border-2 rounded-xl transition-all duration-200 ${formData.postRank === option.value
+                                            ? 'border-yellow-500 bg-yellow-50 shadow-md'
+                                            : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                                            }`}>
+                                            <div className="text-lg font-semibold mb-1">{option.label}</div>
+                                            <div className="text-sm text-gray-600">{option.description}</div>
+                                        </div>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
                         {/* Basic Information */}
                         <div className="space-y-6">
                             <div className="flex items-center gap-3 pb-3 border-b-2 border-gray-100">
@@ -403,20 +458,6 @@ const AddPostPage: React.FC = () => {
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="block text-sm font-semibold text-gray-700">Trạng thái</label>
-                                    <select
-                                        name="status"
-                                        value={formData.status}
-                                        onChange={handleInputChange}
-                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
-                                    >
-                                        <option value="ACTIVE">✅ Hoạt động</option>
-                                        <option value="INACTIVE">⏸️ Tạm dừng</option>
-                                        <option value="PENDING">⏳ Chờ duyệt</option>
-                                    </select>
-                                </div>
-
                                 <div className="space-y-2">
                                     <label className="block text-sm font-semibold text-gray-700">Pháp lý</label>
                                     <select
@@ -583,7 +624,7 @@ const AddPostPage: React.FC = () => {
                                         name="yearBuilt"
                                         value={formData.yearBuilt}
                                         onChange={handleInputChange}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200"
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
                                     />
                                 </div>
                             </div>
@@ -647,7 +688,7 @@ const AddPostPage: React.FC = () => {
                                         {formData.imagePublicIds.map((publicId, index) => (
                                             <div key={index} className="relative flex-shrink-0 w-48">
                                                 <img
-                                                    src={getCloudinaryUrl(publicId, { w: 400, h: 300, c: 'fill' })}
+                                                    src={getCloudinaryUrl(publicId)}
                                                     alt={`Preview ${index + 1}`}
                                                     className="w-full h-36 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200"
                                                     loading="lazy"
