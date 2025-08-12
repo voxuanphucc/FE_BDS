@@ -15,6 +15,8 @@ const LoginModal: React.FC<Props> = ({ onClose }) => {
         e.preventDefault();
         setLoading(true);
         try {
+
+            localStorage.clear(); // Clear any previous tokens
             const data = await authService.login({ phone, password });
 
             localStorage.setItem('authToken', data.token);

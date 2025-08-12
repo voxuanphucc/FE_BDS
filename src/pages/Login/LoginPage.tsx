@@ -13,6 +13,7 @@ const LoginPage = () => {
         e.preventDefault();
         setLoading(true);
         try {
+            localStorage.clear(); // Clear any previous tokens
             const data = await authService.login({ phone, password });
 
             // Lưu token/refreshToken và thông tin user
