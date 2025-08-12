@@ -1,63 +1,47 @@
-import React, { useState } from 'react';
-import { Upload, X, Home, MapPin, DollarSign, Calendar, Ruler, Star } from 'lucide-react';
-
-interface PostFormData {
-    // Post info
-    postRank: string;
-    postType: string;
-    thumbnailUrl: string;
-    realEstateType: string;
-    title: string;
-    content: string;
-
-    // PostDetail info
-    price: number | '';
-    direction: string;
-    square: number | '';
-    length: number | '';
-    width: number | '';
-    streetWidth: number | '';
-    legal: string;
-    bedrooms: number | '';
-    bathrooms: number | '';
-    floors: number | '';
-    yearBuilt: string; // Keep as string for date input, will convert to LocalDate
-    diningRoom: boolean;
-    kitchen: boolean;
-    rooftop: boolean;
-    carPark: boolean;
-    owner: boolean;
-
-    // Images - storing public_ids and URLs
-    imagePublicIds: string[];
-    imageUrls: string[];
-}
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+    Home, 
+    Upload, 
+    X, 
+    Plus, 
+    Minus, 
+    ChevronDown, 
+    ChevronUp,
+    Star,
+    Ruler,
+    DollarSign,
+    MapPin,
+    Calendar
+} from 'lucide-react';
+import { uploadService } from '../../services/uploadService';
+import { postService } from '../../services/postService';
+import { CreatePostData } from '../../types';
 
 const AddPostPage: React.FC = () => {
-    const [formData, setFormData] = useState<PostFormData>({
+    const [formData, setFormData] = useState<CreatePostData>({
         postRank: 'COPPER',
         postType: '',
         thumbnailUrl: '',
         realEstateType: '',
         title: '',
         content: '',
-        price: '',
-        direction: '',
-        square: '',
-        length: '',
-        width: '',
-        streetWidth: '',
-        legal: '',
-        bedrooms: '',
-        bathrooms: '',
-        floors: '',
-        yearBuilt: '',
+        price: null,
+        direction: null,
+        square: null,
+        length: null,
+        width: null,
+        streetWidth: null,
+        legal: null,
+        bedrooms: null,
+        bathrooms: null,
+        floors: null,
+        yearBuilt: null,
         diningRoom: false,
         kitchen: false,
         rooftop: false,
         carPark: false,
         owner: false,
-        imagePublicIds: [],
         imageUrls: []
     });
 
@@ -78,25 +62,12 @@ const AddPostPage: React.FC = () => {
 
     // Simplified Cloudinary upload function
     const uploadToCloudinary = async (file: File): Promise<{ publicId: string; secureUrl: string }> => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', uploadPreset);
-
         try {
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-            if (data.secure_url) {
-                return {
-                    publicId: data.public_id,
-                    secureUrl: data.secure_url
-                };
-            } else {
-                throw new Error('Upload failed - no secure_url received');
-            }
+            const result = await uploadService.uploadImage(file, cloudName, uploadPreset);
+            return {
+                publicId: result.public_id,
+                secureUrl: result.url
+            };
         } catch (error) {
             console.error('Error uploading to Cloudinary:', error);
             throw error;
@@ -132,12 +103,10 @@ const AddPostPage: React.FC = () => {
             const uploadPromises = validFiles.map(file => uploadToCloudinary(file));
             const uploadResults = await Promise.all(uploadPromises);
 
-            const newPublicIds = uploadResults.map(result => result.publicId);
             const newImageUrls = uploadResults.map(result => result.secureUrl);
 
             setFormData(prev => ({
                 ...prev,
-                imagePublicIds: [...prev.imagePublicIds, ...newPublicIds],
                 imageUrls: [...prev.imageUrls, ...newImageUrls],
                 // Set first image as thumbnail if not set
                 thumbnailUrl: prev.thumbnailUrl || newImageUrls[0] || ''
@@ -154,12 +123,10 @@ const AddPostPage: React.FC = () => {
 
     const removeImage = (index: number) => {
         const removedImageUrl = formData.imageUrls[index];
-        const newImageUrls = formData.imageUrls.filter((_, i) => i !== index);
-        const newPublicIds = formData.imagePublicIds.filter((_, i) => i !== index);
+        const newImageUrls = formData.imageUrls.filter((_: string, i: number) => i !== index);
 
         setFormData(prev => ({
             ...prev,
-            imagePublicIds: newPublicIds,
             imageUrls: newImageUrls,
             // Update thumbnail if the removed image was the thumbnail
             thumbnailUrl: prev.thumbnailUrl === removedImageUrl ? (newImageUrls[0] || '') : prev.thumbnailUrl
@@ -215,17 +182,17 @@ const AddPostPage: React.FC = () => {
                 content: formData.content,
 
                 // PostDetail info - convert empty strings to null and handle data types
-                price: formData.price ? Number(formData.price) : null,
-                direction: formData.direction || null,
-                square: formData.square === '' ? null : Number(formData.square),
-                length: formData.length === '' ? null : Number(formData.length),
-                width: formData.width === '' ? null : Number(formData.width),
-                streetWidth: formData.streetWidth === '' ? null : Number(formData.streetWidth),
-                legal: formData.legal || null,
-                bedrooms: formData.bedrooms === '' ? null : Number(formData.bedrooms),
-                bathrooms: formData.bathrooms === '' ? null : Number(formData.bathrooms),
-                floors: formData.floors === '' ? null : Number(formData.floors),
-                yearBuilt: formData.yearBuilt || null, // Backend expects LocalDate, will be parsed from string
+                price: formData.price,
+                direction: formData.direction,
+                square: formData.square,
+                length: formData.length,
+                width: formData.width,
+                streetWidth: formData.streetWidth,
+                legal: formData.legal,
+                bedrooms: formData.bedrooms,
+                bathrooms: formData.bathrooms,
+                floors: formData.floors,
+                yearBuilt: formData.yearBuilt,
                 diningRoom: formData.diningRoom,
                 kitchen: formData.kitchen,
                 rooftop: formData.rooftop,
@@ -238,23 +205,10 @@ const AddPostPage: React.FC = () => {
 
             console.log('Submitting post data:', postData);
 
-            // Call API
-            const response = await fetch('http://localhost:8081/api/posts', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem("authToken")}`
-                },
-                body: JSON.stringify(postData)
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP ${response.status}: ${errorText}`);
-            }
-
-            const result = await response.text();
-            alert(`Thành công! ${result}`);
+            // Call API using postService
+            await postService.createPost(postData);
+            
+            alert('Đăng tin thành công!');
 
             // Reset form after successful submission
             setFormData({
@@ -264,23 +218,22 @@ const AddPostPage: React.FC = () => {
                 realEstateType: '',
                 title: '',
                 content: '',
-                price: '',
-                direction: '',
-                square: '',
-                length: '',
-                width: '',
-                streetWidth: '',
-                legal: '',
-                bedrooms: '',
-                bathrooms: '',
-                floors: '',
-                yearBuilt: '',
+                price: null,
+                direction: null,
+                square: null,
+                length: null,
+                width: null,
+                streetWidth: null,
+                legal: null,
+                bedrooms: null,
+                bathrooms: null,
+                floors: null,
+                yearBuilt: null,
                 diningRoom: false,
                 kitchen: false,
                 rooftop: false,
                 carPark: false,
                 owner: false,
-                imagePublicIds: [],
                 imageUrls: []
             });
 
@@ -301,23 +254,22 @@ const AddPostPage: React.FC = () => {
             realEstateType: '',
             title: '',
             content: '',
-            price: '',
-            direction: '',
-            square: '',
-            length: '',
-            width: '',
-            streetWidth: '',
-            legal: '',
-            bedrooms: '',
-            bathrooms: '',
-            floors: '',
-            yearBuilt: '',
+            price: null,
+            direction: null,
+            square: null,
+            length: null,
+            width: null,
+            streetWidth: null,
+            legal: null,
+            bedrooms: null,
+            bathrooms: null,
+            floors: null,
+            yearBuilt: null,
             diningRoom: false,
             kitchen: false,
             rooftop: false,
             carPark: false,
             owner: false,
-            imagePublicIds: [],
             imageUrls: []
         });
     };
@@ -461,7 +413,7 @@ const AddPostPage: React.FC = () => {
                                     <label className="block text-sm font-semibold text-gray-700">Pháp lý</label>
                                     <select
                                         name="legal"
-                                        value={formData.legal}
+                                        value={formData.legal || ''}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
                                     >
@@ -485,7 +437,7 @@ const AddPostPage: React.FC = () => {
                                     <input
                                         type="number"
                                         name="price"
-                                        value={formData.price}
+                                        value={formData.price || ''}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
                                         placeholder="Nhập giá bán hoặc cho thuê"
@@ -500,7 +452,7 @@ const AddPostPage: React.FC = () => {
                                     </label>
                                     <select
                                         name="direction"
-                                        value={formData.direction}
+                                        value={formData.direction || ''}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
                                     >
@@ -518,7 +470,7 @@ const AddPostPage: React.FC = () => {
                             </div>
 
                             {/* Dimensions */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div className="space-y-2">
                                     <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
                                         <Ruler className="h-4 w-4 text-gray-600" />
@@ -527,7 +479,7 @@ const AddPostPage: React.FC = () => {
                                     <input
                                         type="number"
                                         name="square"
-                                        value={formData.square}
+                                        value={formData.square || ''}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
                                         placeholder="0"
@@ -540,7 +492,7 @@ const AddPostPage: React.FC = () => {
                                     <input
                                         type="number"
                                         name="length"
-                                        value={formData.length}
+                                        value={formData.length || ''}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
                                         placeholder="0"
@@ -553,7 +505,7 @@ const AddPostPage: React.FC = () => {
                                     <input
                                         type="number"
                                         name="width"
-                                        value={formData.width}
+                                        value={formData.width || ''}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
                                         placeholder="0"
@@ -566,7 +518,7 @@ const AddPostPage: React.FC = () => {
                                     <input
                                         type="number"
                                         name="streetWidth"
-                                        value={formData.streetWidth}
+                                        value={formData.streetWidth || ''}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
                                         placeholder="0"
@@ -579,7 +531,7 @@ const AddPostPage: React.FC = () => {
                                     <input
                                         type="number"
                                         name="bedrooms"
-                                        value={formData.bedrooms}
+                                        value={formData.bedrooms || ''}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
                                         placeholder="0"
@@ -592,7 +544,7 @@ const AddPostPage: React.FC = () => {
                                     <input
                                         type="number"
                                         name="bathrooms"
-                                        value={formData.bathrooms}
+                                        value={formData.bathrooms || ''}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
                                         placeholder="0"
@@ -605,7 +557,7 @@ const AddPostPage: React.FC = () => {
                                     <input
                                         type="number"
                                         name="floors"
-                                        value={formData.floors}
+                                        value={formData.floors || ''}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
                                         placeholder="0"
@@ -621,7 +573,7 @@ const AddPostPage: React.FC = () => {
                                     <input
                                         type="date"
                                         name="yearBuilt"
-                                        value={formData.yearBuilt}
+                                        value={formData.yearBuilt || ''}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
                                     />
@@ -641,7 +593,7 @@ const AddPostPage: React.FC = () => {
                                             <input
                                                 type="checkbox"
                                                 name={name}
-                                                checked={formData[name as keyof PostFormData] as boolean}
+                                                checked={formData[name as keyof CreatePostData] as boolean}
                                                 onChange={handleInputChange}
                                                 className="rounded border-gray-300 text-gray-600 focus:ring-gray-500 h-5 w-5"
                                             />
@@ -680,14 +632,14 @@ const AddPostPage: React.FC = () => {
                                     </label>
                                 </div>
                             </div>
-                            {formData.imagePublicIds.length > 0 && (
+                            {formData.imageUrls.length > 0 && (
                                 <div className="mt-6">
                                     <h3 className="text-lg font-medium text-gray-900 mb-4">Ảnh đã tải lên</h3>
                                     <div className="flex overflow-x-auto space-x-4 pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                                        {formData.imagePublicIds.map((publicId, index) => (
+                                        {formData.imageUrls.map((imageUrl, index) => (
                                             <div key={index} className="relative flex-shrink-0 w-48">
                                                 <img
-                                                    src={getCloudinaryUrl(publicId)}
+                                                    src={imageUrl}
                                                     alt={`Preview ${index + 1}`}
                                                     className="w-full h-36 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200"
                                                     loading="lazy"

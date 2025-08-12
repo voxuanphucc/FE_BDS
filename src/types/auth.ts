@@ -9,8 +9,12 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
-  confirmPassword: string;
-  acceptTerms: boolean;
+  roleName?: string;
+  role?: string;
+  phone?: string;
+  phoneNumber?: string;
+  confirmPassword?: string;
+  acceptTerms?: boolean;
 }
 
 export interface AuthUser {

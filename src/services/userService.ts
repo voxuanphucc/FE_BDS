@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+import api from '../config/axios';
 
 export interface User {
   id: string;
@@ -27,7 +25,7 @@ export interface UpdateUserData {
 class UserService {
   async getUsers(): Promise<User[]> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/users`);
+      const response = await api.get('/users');
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -36,7 +34,7 @@ class UserService {
 
   async getUserById(id: string): Promise<User> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/users/${id}`);
+      const response = await api.get(`/users/${id}`);
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -45,7 +43,7 @@ class UserService {
 
   async createUser(data: CreateUserData): Promise<User> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/users`, data);
+      const response = await api.post('/users', data);
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -54,7 +52,7 @@ class UserService {
 
   async updateUser(id: string, data: UpdateUserData): Promise<User> {
     try {
-      const response = await axios.put(`${API_BASE_URL}/users/${id}`, data);
+      const response = await api.put(`/users/${id}`, data);
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -63,7 +61,7 @@ class UserService {
 
   async deleteUser(id: string): Promise<void> {
     try {
-      await axios.delete(`${API_BASE_URL}/users/${id}`);
+      await api.delete(`/users/${id}`);
     } catch (error) {
       throw this.handleError(error);
     }
@@ -71,7 +69,7 @@ class UserService {
 
   async updateProfile(data: UpdateUserData): Promise<User> {
     try {
-      const response = await axios.put(`${API_BASE_URL}/users/profile`, data);
+      const response = await api.put('/users/profile', data);
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -80,7 +78,7 @@ class UserService {
 
   async changePassword(currentPassword: string, newPassword: string): Promise<void> {
     try {
-      await axios.put(`${API_BASE_URL}/users/change-password`, {
+      await api.put('/users/change-password', {
         currentPassword,
         newPassword,
       });

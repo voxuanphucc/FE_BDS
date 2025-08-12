@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Phone } from 'lucide-react';
+import { authService } from '../../services/authService';
 
 const RegisterPage = () => {
     const [roleName, setRoleName] = useState('');
@@ -12,7 +13,7 @@ const RegisterPage = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleRegister = async (e) => {
+    const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (password !== confirmPassword) {
             alert('Mật khẩu xác nhận không khớp!');
@@ -21,22 +22,24 @@ const RegisterPage = () => {
         setLoading(true);
 
         try {
-            const response = await fetch('http://localhost:8081/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ roleName, name, phone, mail, password }),
+            const data = await authService.register({ 
+                name, 
+                email: mail, 
+                password,
+                roleName,
+                phone
             });
-
-            const data = await response.json();
-
-            if (data.status === 'success') {
-                alert(data.message || 'Đăng ký thành công!'); // Giả sử response tương tự login
-                navigate('/login'); // Redirect đến login sau đăng ký
-            } else {
-                alert('Đăng ký thất bại: ' + data.message);
-            }
+            
+            // Lưu token sau khi đăng ký thành công
+            localStorage.setItem('authToken', data.token);
+            if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+            localStorage.setItem('userData', JSON.stringify(data.user));
+            
+            alert('Đăng ký thành công!');
+            navigate('/'); // Redirect về trang chủ
         } catch (error) {
-            alert('Lỗi kết nối: ' + error.message);
+            const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định';
+            alert('Đăng ký thất bại: ' + errorMessage);
         } finally {
             setLoading(false);
         }
@@ -58,7 +61,6 @@ const RegisterPage = () => {
                             <option value="">Chọn vai trò</option>
                             <option value="USER">User</option>
                             <option value="ADMIN">Admin</option>
-                            {/* Thêm các role khác nếu cần */}
                         </select>
                     </div>
 

@@ -72,7 +72,7 @@ npm install
 3. Create a `.env` file in the root directory:
 ```env
 # API Configuration
-REACT_APP_API_URL=http://localhost:3001/api
+REACT_APP_API_URL=https://bds-be-g9xi.onrender.com/api
 REACT_APP_API_TIMEOUT=10000
 
 # App Configuration

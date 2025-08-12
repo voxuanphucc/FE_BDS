@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, Lock } from 'lucide-react';
+import { authService } from '../../services/authService';
 
 interface Props {
     onClose: () => void;
@@ -14,23 +15,17 @@ const LoginModal: React.FC<Props> = ({ onClose }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:8081/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, password }),
-            });
+            const data = await authService.login({ email: phone, password });
 
-            const data = await response.json();
+            localStorage.setItem('authToken', data.token);
+            if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+            localStorage.setItem('userData', JSON.stringify(data.user));
 
-            if (data.status === 'success') {
-                localStorage.setItem('authToken', data.data.token);
-                alert(data.message);
-                onClose(); // đóng modal
-            } else {
-                alert('Đăng nhập thất bại: ' + data.message);
-            }
+            alert('Đăng nhập thành công!');
+            onClose();
         } catch (error) {
-            alert('Lỗi kết nối: ' + error.message);
+            const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định';
+            alert('Đăng nhập thất bại: ' + errorMessage);
         } finally {
             setLoading(false);
         }

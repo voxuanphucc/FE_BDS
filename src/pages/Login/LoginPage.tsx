@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Lock } from 'lucide-react';
+import { authService } from '../../services/authService';
 
 const LoginPage = () => {
     const [phone, setPhone] = useState('');
@@ -8,28 +9,22 @@ const LoginPage = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogin = async (e) => {
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:8081/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, password }),
-            });
+            const data = await authService.login({ email: phone, password });
 
-            const data = await response.json();
+            // Lưu token/refreshToken và thông tin user
+            localStorage.setItem('authToken', data.token);
+            if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+            localStorage.setItem('userData', JSON.stringify(data.user));
 
-            if (data.status === 'success') {
-                // Lưu token vào localStorage
-                localStorage.setItem('authToken', data.data.token);
-                alert(data.message); // Hoặc sử dụng toast notification
-                navigate('/'); // Redirect đến trang chính (thay đổi nếu cần)
-            } else {
-                alert('Đăng nhập thất bại: ' + data.message);
-            }
+            alert('Đăng nhập thành công!');
+            navigate('/');
         } catch (error) {
-            alert('Lỗi kết nối: ' + error.message);
+            const message = error instanceof Error ? error.message : 'Lỗi không xác định';
+            alert('Đăng nhập thất bại: ' + message);
         } finally {
             setLoading(false);
         }

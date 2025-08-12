@@ -1,33 +1,13 @@
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import NavigationMenu from "../../components/layout/NavigationMenu";
+import { Heart, MessageCircle, Eye, Calendar, User } from 'lucide-react';
+import { postService } from '../../services/postService';
+import { favoriteService } from '../../services/favoriteService';
+import { PostSummary } from '../../types';
 
 export default function HomePage() {
-    interface PostSummaryDTO {
-        id: string;
-        postRank: string;
-        postType: string;
-        thumbnailUrl: string;
-        realEstateType: string;
-        title: string;
-        status: string;
-        createdAt: string;
-
-        price: number;
-        direction: string;
-        square: number;
-        streetWidth: number;
-        bedrooms: number;
-        bathrooms: number;
-        floors: number;
-        diningRoom: boolean;
-        kitchen: boolean;
-        rooftop: boolean;
-        carPark: boolean;
-
-        imageUrls: string;
-    }
-
-    const [posts, setPosts] = useState<PostSummaryDTO[]>([]);
+    const [posts, setPosts] = useState<PostSummary[]>([]);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
 
@@ -43,18 +23,12 @@ export default function HomePage() {
     const fetchPosts = async (pageNumber: number) => {
         setLoading(true);
         try {
-            const response = await fetch(`http://localhost:8081/api/posts/summary?page=${pageNumber}&size=20`);
-            const data = await response.json();
-
-            if (data.status === "success") {
-                setPosts(data.data?.items ?? []);
-                // Tính tổng số trang dựa trên tổng số item và size
-                const totalItems = data.data?.total ?? 0;
-                const calculatedTotalPages = Math.ceil(totalItems / 10);
-                setTotalPages(calculatedTotalPages);
-            }
+            const data = await postService.getPosts(pageNumber, 20);
+            setPosts(data.data.items);
+            // Sử dụng hasMore để xác định có trang tiếp theo không
+            setTotalPages(data.data.hasMore ? pageNumber + 1 : pageNumber);
         } catch (err) {
-            console.error("Lỗi khi fetch bài đăng:", err);
+            console.error('Error fetching posts:', err);
         } finally {
             setLoading(false);
         }
@@ -100,20 +74,8 @@ export default function HomePage() {
     };
     const handleAddToFavorites = async (postId: string) => {
         try {
-            const response = await fetch(`http://localhost:8081/api/favorites`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ postId }),
-            });
-
-            const result = await response.json();
-            if (result.status === 'success') {
-                alert('Đã thêm vào danh sách yêu thích!');
-            } else {
-                alert('Không thể thêm vào yêu thích.');
-            }
+            await favoriteService.addToFavorites(postId);
+            alert('Đã thêm vào danh sách yêu thích!');
         } catch (error) {
             console.error('Lỗi khi thêm vào yêu thích:', error);
             alert('Đã xảy ra lỗi.');
@@ -135,9 +97,9 @@ export default function HomePage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             {/* Hero Banner */}
-            <div className="relative bg-gradient-to-r from-gray-600 to-gray-800 rounded-2xl mx-4 mt-8 mb-8 p-8">
+            <div className="relative bg-gradient-to-r from-gray-600 to-gray-800 rounded-2xl mx-4 mt-8 mb-8 p-8 shadow-xl">
                 <div className="relative z-10 flex items-center">
                     <div className="bg-white rounded-full p-4 mr-6">
                         <svg className="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
@@ -161,27 +123,31 @@ export default function HomePage() {
             </div>
 
             {/* Statistics Section */}
-            <div className="bg-white rounded-2xl mx-4 p-8 shadow-sm">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    {/* Cards omitted for brevity */}
-                </div>
+             {/* Navigation Menu */}
+              <div className="mb-10 flex justify-center">
+                <NavigationMenu />
             </div>
 
             {/* Latest Posts */}
             <div className="container mx-auto px-4 sm:px-14 lg:px-56">
-                <h2 className="text-2xl font-bold mb-4 text-gray-800">Tin đăng mới nhất</h2>
+            
+                
+                <h2 className="text-3xl font-bold mb-8 text-gray-800 flex items-center">
+                    <span className="w-2 h-8 bg-gradient-to-b from-teal-500 to-teal-600 rounded-full mr-3 shadow-sm"></span>
+                    Tin đăng mới nhất
+                </h2>
 
                 {loading ? (
                     <div className="flex justify-center items-center py-12">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {posts.map((post) => (
                             <Link
                                 key={post.id}
                                 to={`/post/${post.id}?from=${currentPage > 0 ? `page=${currentPage}` : ''}`}
-                                className="bg-white rounded-lg shadow-md p-3 hover:shadow-lg transition-shadow cursor-pointer block relative"
+                                className="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition-all duration-300 cursor-pointer block relative transform hover:-translate-y-1 border border-gray-100"
                             >
                                 <div className="relative mb-3">
                                     <img
@@ -245,12 +211,12 @@ export default function HomePage() {
 
                 {/* Numbered Pagination */}
                 {totalPages > 1 && (
-                    <div className="flex justify-center items-center mt-8 space-x-2">
+                    <div className="flex justify-center items-center mt-12 space-x-3">
                         {/* Previous button */}
                         <button
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 0}
-                            className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-teal-50 hover:border-teal-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                         >
                             ‹
                         </button>
@@ -260,7 +226,7 @@ export default function HomePage() {
                             <>
                                 <button
                                     onClick={() => handlePageChange(0)}
-                                    className="w-10 h-10 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                                    className="w-12 h-12 rounded-lg border border-gray-300 text-gray-700 hover:bg-teal-50 hover:border-teal-300 transition-all duration-200 font-medium"
                                 >
                                     1
                                 </button>
@@ -275,9 +241,9 @@ export default function HomePage() {
                             <button
                                 key={pageNum}
                                 onClick={() => handlePageChange(pageNum)}
-                                className={`w-10 h-10 rounded-lg border transition-colors font-medium ${currentPage === pageNum
-                                    ? 'bg-blue-600 text-white border-blue-600'
-                                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                                className={`w-12 h-12 rounded-lg border transition-all duration-200 font-medium ${currentPage === pageNum
+                                    ? 'bg-gradient-to-r from-teal-500 to-blue-600 text-white border-teal-500 shadow-lg'
+                                    : 'border-gray-300 text-gray-700 hover:bg-teal-50 hover:border-teal-300'
                                     }`}
                             >
                                 {pageNum + 1}
@@ -292,7 +258,7 @@ export default function HomePage() {
                                 )}
                                 <button
                                     onClick={() => handlePageChange(totalPages - 1)}
-                                    className="w-10 h-10 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                                    className="w-12 h-12 rounded-lg border border-gray-300 text-gray-700 hover:bg-teal-50 hover:border-teal-300 transition-all duration-200 font-medium"
                                 >
                                     {totalPages}
                                 </button>
@@ -303,7 +269,7 @@ export default function HomePage() {
                         <button
                             onClick={() => handlePageChange(currentPage + 1)}
                             disabled={currentPage === totalPages - 1}
-                            className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-teal-50 hover:border-teal-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                         >
                             ›
                         </button>

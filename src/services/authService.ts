@@ -1,33 +1,11 @@
-import axios from 'axios';
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
-  token: string;
-}
+import api from '../config/axios';
+import { LoginCredentials, RegisterData, AuthResponse } from '../types';
 
 class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
-      return response.data;
+      const response = await api.post('/auth/login', credentials);
+      return response.data?.data as AuthResponse;
     } catch (error) {
       throw this.handleError(error);
     }
@@ -35,16 +13,29 @@ class AuthService {
 
   async register(data: RegisterData): Promise<AuthResponse> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/register`, data);
-      return response.data;
-    } catch (error) {
+      const payload = {
+        name: data.name,
+        username: data.name,
+        email: data.email,
+        password: data.password,
+        phone: data.phone || data.phoneNumber,
+        roleName: data.roleName || data.role,
+      };
+
+      const response = await api.post('/auth/register', payload);
+      return response.data?.data as AuthResponse;
+    } catch (error: any) {
+      const serverMessage = error?.response?.data?.message;
+      if (serverMessage) {
+        throw new Error(serverMessage);
+      }
       throw this.handleError(error);
     }
   }
 
   async logout(): Promise<void> {
     try {
-      await axios.post(`${API_BASE_URL}/auth/logout`);
+      await api.post('/auth/logout');
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -52,8 +43,8 @@ class AuthService {
 
   async refreshToken(): Promise<AuthResponse> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/refresh`);
-      return response.data;
+      const response = await api.post('/auth/refresh');
+      return response.data?.data as AuthResponse;
     } catch (error) {
       throw this.handleError(error);
     }
@@ -61,8 +52,8 @@ class AuthService {
 
   async getCurrentUser(): Promise<AuthResponse['user']> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/auth/me`);
-      return response.data;
+      const response = await api.get('/auth/me');
+      return response.data?.data as AuthResponse['user'];
     } catch (error) {
       throw this.handleError(error);
     }
@@ -70,14 +61,11 @@ class AuthService {
 
   private handleError(error: any): Error {
     if (error.response) {
-      // Server responded with error status
-      const message = error.response.data?.message || 'An error occurred';
+      const message = error.response.data?.message || error.response.statusText || 'An error occurred';
       return new Error(message);
     } else if (error.request) {
-      // Request was made but no response received
       return new Error('Network error. Please check your connection.');
     } else {
-      // Something else happened
       return new Error('An unexpected error occurred.');
     }
   }

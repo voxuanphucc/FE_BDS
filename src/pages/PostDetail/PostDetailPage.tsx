@@ -21,48 +21,12 @@ import {
     ChevronLeft,
     ChevronRight
 } from 'lucide-react';
+import { postService } from '../../services/postService';
+import { Post } from '../../types';
 
-interface PostFullDTO {
-    id: string;
-    postRank: string;
-    postType: string;
-    thumbnailUrl: string;
-    realEstateType: string;
-    title: string;
-    content: string;
-    status: string;
-    createdAt: string;
-
-    // Post detail fields (can be null)
-    price?: number;
-    direction?: string;
-    square?: number;
-    length?: number;
-    width?: number;
-    streetWidth?: number;
-    legal?: string;
-    bedrooms?: number;
-    bathrooms?: number;
-    floors?: number;
-    yearBuilt?: string;
-    diningRoom?: boolean;
-    kitchen?: boolean;
-    rooftop?: boolean;
-    carPark?: boolean;
-    owner?: boolean;
-
-    // Images
-    imageUrls?: string[];
-}
-
-interface ApiResponseSuccess<T> {
-    code: number;
-    message: string;
-    data: T;
-}
 
 const PostDetailPage: React.FC = () => {
-    const [post, setPost] = useState<PostFullDTO | null>(null);
+    const [post, setPost] = useState<Post | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>('');
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
@@ -83,33 +47,14 @@ const PostDetailPage: React.FC = () => {
     }, [postId]);
 
     const fetchPost = async () => {
+        if (!postId) return;
+        
         setLoading(true);
         setError('');
 
         try {
-            const response = await fetch(`http://localhost:8081/api/posts/${postId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // Add authorization header if needed
-                    // 'Authorization': `Bearer ${token}`
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: Không thể tải thông tin bài viết`);
-            }
-
-            // Handle ApiResponseSuccess structure
-            const apiResponse = await response.json();
-
-            // Check if the response has the expected structure
-            if (apiResponse.code === 200 && apiResponse.data) {
-                setPost(apiResponse.data);
-            } else {
-                throw new Error(apiResponse.message || 'Không thể tải dữ liệu');
-            }
-
+            const postData = await postService.getPostById(postId);
+            setPost(postData);
         } catch (err) {
             console.error('Error fetching post:', err);
             setError(err instanceof Error ? err.message : 'Có lỗi xảy ra khi tải dữ liệu');
