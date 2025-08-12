@@ -17,6 +17,10 @@ export const publicRoutes: RouteObject[] = [
     element: React.createElement(RegisterPage),
   },
   {
+    path: '/home',
+    element: React.createElement(Home),
+  },
+  {
     path: '/',
     element: React.createElement(Home),
   },

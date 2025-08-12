@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import {
     ArrowLeft,
@@ -68,10 +68,13 @@ const PostDetailPage: React.FC = () => {
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [isLiked, setIsLiked] = useState<boolean>(false);
 
-    // Get post ID from URL params - you might need to adjust this based on your routing setup
-    // For now, using a sample ID - replace with actual routing logic
-    const postId = "4c219126-d05f-4f32-be4a-9f23034b0cd9"; // Replace with useParams() or props
+    // Sử dụng useParams để lấy postId từ URL
+    const { postId } = useParams<{ postId: string }>();
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+
+    // Lấy thông tin trang trước đó từ query parameter 'from'
+    const fromParam = searchParams.get('from');
 
     useEffect(() => {
         if (postId) {
@@ -112,6 +115,16 @@ const PostDetailPage: React.FC = () => {
             setError(err instanceof Error ? err.message : 'Có lỗi xảy ra khi tải dữ liệu');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleGoBack = () => {
+        if (fromParam) {
+            // Nếu có thông tin trang trước, quay lại trang đó
+            navigate(`/home?${fromParam}`);
+        } else {
+            // Nếu không có thông tin, quay lại trang chủ
+            navigate('/home ');
         }
     };
 
@@ -180,7 +193,7 @@ const PostDetailPage: React.FC = () => {
     const nextImage = () => {
         if (post?.imageUrls) {
             setCurrentImageIndex((prev) =>
-                prev === post.imageUrls.length - 1 ? 0 : prev + 1
+                prev === post.imageUrls!.length - 1 ? 0 : prev + 1
             );
         }
     };
@@ -188,7 +201,7 @@ const PostDetailPage: React.FC = () => {
     const prevImage = () => {
         if (post?.imageUrls) {
             setCurrentImageIndex((prev) =>
-                prev === 0 ? post.imageUrls.length - 1 : prev - 1
+                prev === 0 ? post.imageUrls!.length - 1 : prev - 1
             );
         }
     };
@@ -221,7 +234,7 @@ const PostDetailPage: React.FC = () => {
                             Thử lại
                         </button>
                         <button
-                            onClick={() => navigate("/")}
+                            onClick={handleGoBack}
                             className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
                         >
                             Quay lại
@@ -244,7 +257,10 @@ const PostDetailPage: React.FC = () => {
             <div className="bg-white shadow-sm border-b">
                 <div className="max-w-7xl mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
-                        <button className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors">
+                        <button
+                            onClick={handleGoBack}
+                            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+                        >
                             <ArrowLeft className="h-5 w-5" />
                             <span>Quay lại</span>
                         </button>
@@ -273,11 +289,22 @@ const PostDetailPage: React.FC = () => {
                             <div className="relative">
                                 {post.imageUrls && post.imageUrls.length > 0 ? (
                                     <>
-                                        <img
-                                            src={post.imageUrls[currentImageIndex]}
-                                            alt={`Property ${currentImageIndex + 1}`}
-                                            className="w-full h-96 object-cover"
-                                        />
+                                        <div className="relative w-full h-96 overflow-hidden">
+                                            {/* Background blur layer */}
+                                            <img
+                                                src={post.imageUrls[currentImageIndex]}
+                                                alt="Blurred background"
+                                                className="absolute inset-0 w-full h-full object-cover blur-xl scale-110"
+                                            />
+
+                                            {/* Foreground image */}
+                                            <img
+                                                src={post.imageUrls[currentImageIndex]}
+                                                alt={`Property ${currentImageIndex + 1}`}
+                                                className="relative z-10 w-full h-full object-contain"
+                                            />
+                                        </div>
+
                                         {post.imageUrls.length > 1 && (
                                             <>
                                                 <button
@@ -312,13 +339,13 @@ const PostDetailPage: React.FC = () => {
                                 )}
 
                                 {/* Rank Badge */}
-                                <div className={`absolute top-4 left-4 ${rankDisplay.color} text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1`}>
+                                <div className={`absolute top-4 left-4 ${rankDisplay.color} text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1 z-10`}>
                                     <span>{rankDisplay.icon}</span>
                                     <span>{rankDisplay.label}</span>
                                 </div>
 
                                 {/* Type Badge */}
-                                <div className={`absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1 ${typeDisplay.color}`}>
+                                <div className={`absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1 ${typeDisplay.color} z-10`}>
                                     <span>{typeDisplay.icon}</span>
                                     <span>{typeDisplay.label}</span>
                                 </div>
@@ -377,7 +404,7 @@ const PostDetailPage: React.FC = () => {
                         <div className="bg-white rounded-2xl shadow-lg p-6">
                             <h2 className="text-xl font-semibold text-gray-900 mb-6">Thông số kỹ thuật</h2>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {post.square && (
                                     <div className="flex items-center gap-3">
                                         <div className="p-2 bg-blue-100 rounded-lg">
@@ -455,7 +482,7 @@ const PostDetailPage: React.FC = () => {
                             {(post.length || post.width || post.streetWidth) && (
                                 <div className="mt-6 pt-6 border-t">
                                     <h3 className="font-semibold text-gray-900 mb-4">Kích thước</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-3 md:grid-cols-3 gap-4">
                                         {post.length && (
                                             <div className="text-center p-4 bg-gray-50 rounded-lg">
                                                 <p className="text-sm text-gray-500">Chiều dài</p>

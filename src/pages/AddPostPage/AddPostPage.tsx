@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import React, { useState, useRef, useEffect } from 'react';
-import { Upload, X, Home, MapPin, DollarSign, Calendar, Ruler } from 'lucide-react';
-=======
 import React, { useState } from 'react';
 import { Upload, X, Home, MapPin, DollarSign, Calendar, Ruler, Star } from 'lucide-react';
->>>>>>> 1a25ea486cecf8096ea7e8ed4f6b58eee6a6fd2b
 
 interface PostFormData {
     // Post info
@@ -37,135 +32,6 @@ interface PostFormData {
     imagePublicIds: string[];
     imageUrls: string[];
 }
-
-// CustomDropdown dùng chung cho các trường
-function CustomDropdown({ options, value, onChange, placeholder }: { options: { value: string, label: string }[], value: string, onChange: (v: string) => void, placeholder?: string }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-  const selected = options.find(opt => opt.value === value) || { value: '', label: placeholder || 'Chọn' };
-  return (
-    <div ref={ref} style={{ position: 'relative', width: '100%' }}>
-      <div
-        tabIndex={0}
-        onClick={() => setOpen(o => !o)}
-        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 hover:bg-white cursor-pointer flex items-center justify-between"
-        style={{ outline: 'none', boxShadow: 'none' }}
-      >
-        <span>{selected.label}</span>
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-      </div>
-      {open && (
-        <ul
-          className="absolute left-0 right-0 mt-1 bg-white rounded-xl shadow-lg z-10 border border-gray-200"
-          style={{ listStyle: 'none', padding: 0, margin: 0 }}
-        >
-          {options.map(opt => (
-            <li
-              key={opt.value}
-              onClick={() => { onChange(opt.value); setOpen(false); }}
-              className={`px-4 py-3 cursor-pointer flex items-center gap-2 hover:bg-gray-100 ${value === opt.value ? 'bg-blue-600 text-white' : ''}`}
-            >
-              {opt.label}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-// CustomDropdown cho loại bất động sản
-const realEstateOptions = [
-  { value: '', label: 'Chọn loại bất động sản' },
-  { value: 'HOUSE', label: '🏡 Nhà ở' },
-  { value: 'APARTMENT', label: '🏢 Chung cư' },
-  { value: 'LAND', label: '🌳 Đất nền' },
-  { value: 'COMMERCIAL', label: '🏪 Thương mại' },
-];
-
-function RealEstateDropdown({ value, onChange }: { value: string, onChange: (v: string) => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-  const selected = realEstateOptions.find(opt => opt.value === value) || realEstateOptions[0];
-  return (
-    <div ref={ref} style={{ position: 'relative', width: '100%' }}>
-      <div
-        tabIndex={0}
-        onClick={() => setOpen(o => !o)}
-        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 hover:bg-white cursor-pointer flex items-center justify-between"
-        style={{ outline: 'none', boxShadow: 'none' }}
-      >
-        <span>{selected.label}</span>
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-      </div>
-      {open && (
-        <ul
-          className="absolute left-0 right-0 mt-1 bg-white rounded-xl shadow-lg z-10 border border-gray-200"
-          style={{ listStyle: 'none', padding: 0, margin: 0 }}
-        >
-          {realEstateOptions.map(opt => (
-            <li
-              key={opt.value}
-              onClick={() => { onChange(opt.value); setOpen(false); }}
-              className={`px-4 py-3 cursor-pointer flex items-center gap-2 hover:bg-gray-100 ${value === opt.value ? 'bg-blue-600 text-white' : ''}`}
-            >
-              {opt.label}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-// Các options cho dropdown
-const postTypeOptions = [
-  { value: '', label: 'Chọn loại tin đăng' },
-  { value: 'SALE', label: '🏠 Bán' },
-  { value: 'RENT', label: '🏘️ Cho thuê' },
-];
-const statusOptions = [
-  { value: 'ACTIVE', label: '✅ Hoạt động' },
-  { value: 'INACTIVE', label: '⏸️ Tạm dừng' },
-  { value: 'PENDING', label: '⏳ Chờ duyệt' },
-];
-const legalOptions = [
-  { value: '', label: 'Chọn loại pháp lý' },
-  { value: 'RED_BOOK', label: '📕 Sổ đỏ' },
-  { value: 'PINK_BOOK', label: '📖 Sổ hồng' },
-  { value: 'SALES_CONTRACT', label: '📋 Hợp đồng mua bán' },
-  { value: 'WAITING_FOR_BOOK', label: '⏰ Chờ sổ' },
-  { value: 'OTHER', label: '📄 Khác' },
-];
-const directionOptions = [
-  { value: '', label: 'Chọn hướng nhà' },
-  { value: 'NORTH', label: '🧭 Bắc' },
-  { value: 'SOUTH', label: '🧭 Nam' },
-  { value: 'EAST', label: '🧭 Đông' },
-  { value: 'WEST', label: '🧭 Tây' },
-  { value: 'NORTHEAST', label: '🧭 Đông Bắc' },
-  { value: 'NORTHWEST', label: '🧭 Tây Bắc' },
-  { value: 'SOUTHEAST', label: '🧭 Đông Nam' },
-  { value: 'SOUTHWEST', label: '🧭 Tây Nam' },
-];
 
 const AddPostPage: React.FC = () => {
     const [formData, setFormData] = useState<PostFormData>({
@@ -205,7 +71,7 @@ const AddPostPage: React.FC = () => {
     // Post rank options
     const postRankOptions = [
         { value: 'COPPER', label: '🥉 Đồng - Miễn phí', description: 'Tin thường, chờ duyệt' },
-        { value: 'SILVER', label: '🥈 Bạc - 50k/tuần', description: 'Hiển thị ưu tiên' },
+        { value: 'SLIVER', label: '🥈 Bạc - 50k/tuần', description: 'Hiển thị ưu tiên' },
         { value: 'GOLD', label: '🥇 Vàng - 100k/tuần', description: 'Hiển thị nổi bật' },
         { value: 'DIAMOND', label: '💎 Kim cương - 200k/tuần', description: 'Hiển thị VIP' }
     ];
@@ -518,22 +384,35 @@ const AddPostPage: React.FC = () => {
                                     <label className="block text-sm font-semibold text-gray-700">
                                         Loại tin đăng <span className="text-red-500">*</span>
                                     </label>
-                                    <CustomDropdown
-                                      options={postTypeOptions}
-                                      value={formData.postType}
-                                      onChange={v => setFormData(prev => ({ ...prev, postType: v }))}
-                                      placeholder="Chọn loại tin đăng"
-                                    />
+                                    <select
+                                        name="postType"
+                                        value={formData.postType}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
+                                        required
+                                    >
+                                        <option value="">Chọn loại tin đăng</option>
+                                        <option value="SALE">🏠 Bán</option>
+                                        <option value="RENT">🏘️ Cho thuê</option>
+                                    </select>
                                 </div>
 
                                 <div className="space-y-2">
                                     <label className="block text-sm font-semibold text-gray-700">
                                         Loại bất động sản <span className="text-red-500">*</span>
                                     </label>
-                                    <RealEstateDropdown
-                                      value={formData.realEstateType}
-                                      onChange={v => setFormData(prev => ({ ...prev, realEstateType: v }))}
-                                    />
+                                    <select
+                                        name="realEstateType"
+                                        value={formData.realEstateType}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
+                                        required
+                                    >
+                                        <option value="">Chọn loại bất động sản</option>
+                                        <option value="Nhà ở">🏡 Nhà ở</option>
+                                        <option value="Chung cư">🏢 Chung cư</option>
+                                        <option value="Đất nề">🌳 Đất nền</option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -579,26 +458,20 @@ const AddPostPage: React.FC = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-<<<<<<< HEAD
-                                    <label className="block text-sm font-semibold text-gray-700">Trạng thái</label>
-                                    <CustomDropdown
-                                      options={statusOptions}
-                                      value={formData.status}
-                                      onChange={v => setFormData(prev => ({ ...prev, status: v }))}
-                                      placeholder="Chọn trạng thái"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-=======
->>>>>>> 1a25ea486cecf8096ea7e8ed4f6b58eee6a6fd2b
                                     <label className="block text-sm font-semibold text-gray-700">Pháp lý</label>
-                                    <CustomDropdown
-                                      options={legalOptions}
-                                      value={formData.legal}
-                                      onChange={v => setFormData(prev => ({ ...prev, legal: v }))}
-                                      placeholder="Chọn loại pháp lý"
-                                    />
+                                    <select
+                                        name="legal"
+                                        value={formData.legal}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
+                                    >
+                                        <option value="">Chọn loại pháp lý</option>
+                                        <option value="RED_BOOK">📕 Sổ đỏ</option>
+                                        <option value="PINK_BOOK">📖 Sổ hồng</option>
+                                        <option value="SALES_CONTRACT">📋 Hợp đồng mua bán</option>
+                                        <option value="WAITING_FOR_BOOK">⏰ Chờ sổ</option>
+                                        <option value="OTHER">📄 Khác</option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -625,12 +498,22 @@ const AddPostPage: React.FC = () => {
                                         <MapPin className="h-4 w-4 text-gray-600" />
                                         Hướng nhà
                                     </label>
-                                    <CustomDropdown
-                                      options={directionOptions}
-                                      value={formData.direction}
-                                      onChange={v => setFormData(prev => ({ ...prev, direction: v }))}
-                                      placeholder="Chọn hướng nhà"
-                                    />
+                                    <select
+                                        name="direction"
+                                        value={formData.direction}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
+                                    >
+                                        <option value="">Chọn hướng nhà</option>
+                                        <option value="NORTH">🧭 Bắc</option>
+                                        <option value="SOUTH">🧭 Nam</option>
+                                        <option value="EAST">🧭 Đông</option>
+                                        <option value="WEST">🧭 Tây</option>
+                                        <option value="NORTHEAST">🧭 Đông Bắc</option>
+                                        <option value="NORTHWEST">🧭 Tây Bắc</option>
+                                        <option value="SOUTHEAST">🧭 Đông Nam</option>
+                                        <option value="SOUTHWEST">🧭 Tây Nam</option>
+                                    </select>
                                 </div>
                             </div>
 
