@@ -15,12 +15,10 @@ const LoginModal: React.FC<Props> = ({ onClose }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const data = await authService.login({ email: phone, password });
+            const data = await authService.login({ phone, password });
 
             localStorage.setItem('authToken', data.token);
             if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
-            localStorage.setItem('userData', JSON.stringify(data.user));
-
             alert('Đăng nhập thành công!');
             onClose();
         } catch (error) {
