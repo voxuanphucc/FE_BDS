@@ -1,7 +1,6 @@
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import NavigationMenu from "../../components/layout/NavigationMenu";
-import { Heart, MessageCircle, Eye, Calendar, User } from 'lucide-react';
 import { postService } from '../../services/postService';
 import { favoriteService } from '../../services/favoriteService';
 import { PostSummary } from '../../types';
@@ -15,18 +14,18 @@ export default function HomePage() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
-    // Lấy page từ URL, default là 0
-    const currentPage = parseInt(searchParams.get('page') || '0', 10);
+    // Lấy page từ URL, default là 1 (UI hiển thị 1-based)
+    const currentPageUI = parseInt(searchParams.get('page') || '1', 10);
 
-
-
-    const fetchPosts = async (pageNumber: number) => {
+    const fetchPosts = async (pageNumberUI: number) => {
         setLoading(true);
         try {
-            const data = await postService.getPosts(pageNumber, 20);
+            // Convert UI page (1-based) to API page (0-based)
+            const apiPage = pageNumberUI - 1;
+            const data = await postService.getPosts(apiPage, 20);
             setPosts(data.data.items);
-            // Sử dụng hasMore để xác định có trang tiếp theo không
-            setTotalPages(data.data.hasMore ? pageNumber + 1 : pageNumber);
+            // Sử dụng totalPage từ response
+            setTotalPages(data.data.totalPage);
         } catch (err) {
             console.error('Error fetching posts:', err);
         } finally {
@@ -35,12 +34,12 @@ export default function HomePage() {
     };
 
     useEffect(() => {
-        fetchPosts(currentPage);
-    }, [currentPage]);
+        fetchPosts(currentPageUI);
+    }, [currentPageUI]);
 
     const handlePageChange = (newPage: number) => {
         // Cập nhật URL với page parameter
-        if (newPage === 0) {
+        if (newPage === 1) {
             // Nếu là trang đầu tiên, không cần page parameter
             navigate('/');
         } else {
@@ -50,20 +49,20 @@ export default function HomePage() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // Tạo array các số trang để hiển thị
+    // Tạo array các số trang để hiển thị (UI 1-based)
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 5;
 
         if (totalPages <= maxVisiblePages) {
             // Nếu tổng số trang <= 5, hiển thị tất cả
-            for (let i = 0; i < totalPages; i++) {
+            for (let i = 1; i <= totalPages; i++) {
                 pageNumbers.push(i);
             }
         } else {
             // Hiển thị logic phức tạp hơn cho nhiều trang
-            const startPage = Math.max(0, currentPage - 2);
-            const endPage = Math.min(totalPages - 1, startPage + maxVisiblePages - 1);
+            const startPage = Math.max(1, currentPageUI - 2);
+            const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
             for (let i = startPage; i <= endPage; i++) {
                 pageNumbers.push(i);
@@ -72,6 +71,7 @@ export default function HomePage() {
 
         return pageNumbers;
     };
+
     const handleAddToFavorites = async (postId: string) => {
         try {
             await favoriteService.addToFavorites(postId);
@@ -123,15 +123,13 @@ export default function HomePage() {
             </div>
 
             {/* Statistics Section */}
-             {/* Navigation Menu */}
-              <div className="mb-10 flex justify-center">
+            {/* Navigation Menu */}
+            <div className="mb-10 flex justify-center">
                 <NavigationMenu />
             </div>
 
             {/* Latest Posts */}
             <div className="container mx-auto px-4 sm:px-14 lg:px-56">
-            
-                
                 <h2 className="text-3xl font-bold mb-8 text-gray-800 flex items-center">
                     <span className="w-2 h-8 bg-gradient-to-b from-teal-500 to-teal-600 rounded-full mr-3 shadow-sm"></span>
                     Tin đăng mới nhất
@@ -146,8 +144,8 @@ export default function HomePage() {
                         {posts.map((post) => (
                             <Link
                                 key={post.id}
-                                to={`/post/${post.id}?from=${currentPage > 0 ? `page=${currentPage}` : ''}`}
-                                className="bg-white rounded-xl shadow-lg p-4 hover:shadow-xl transition-all duration-300 cursor-pointer block relative transform hover:-translate-y-1 border border-gray-100"
+                                to={`/post/${post.id}?from=${currentPageUI > 1 ? `page=${currentPageUI}` : ''}`}
+                                className="bg-white rounded-xl shadow-lg p-2 hover:shadow-xl transition-all duration-300 cursor-pointer block relative transform hover:-translate-y-1 border border-gray-100"
                             >
                                 <div className="relative mb-3">
                                     <img
@@ -161,11 +159,9 @@ export default function HomePage() {
                                             : post.postRank === 'GOLD'
                                                 ? '✨ Tin nổi bật'
                                                 : formatRelativeTime(post.createdAt)}
-
                                     </div>
                                 </div>
                                 <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2">{post.title}</h3>
-
 
                                 {/* Giá tiền + biểu tượng trái tim */}
                                 <div className="flex items-center justify-between mb-2">
@@ -191,7 +187,7 @@ export default function HomePage() {
                                             xmlns="http://www.w3.org/2000/svg"
                                             className="h-6 w-6"
                                             fill="none"
-                                            color="black    "
+                                            color="black"
                                             viewBox="0 0 24 24"
                                             stroke="currentColor"
                                             strokeWidth={2}
@@ -214,23 +210,23 @@ export default function HomePage() {
                     <div className="flex justify-center items-center mt-12 space-x-3">
                         {/* Previous button */}
                         <button
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 0}
+                            onClick={() => handlePageChange(currentPageUI - 1)}
+                            disabled={currentPageUI === 1}
                             className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-teal-50 hover:border-teal-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                         >
                             ‹
                         </button>
 
                         {/* First page if not visible */}
-                        {getPageNumbers()[0] > 0 && (
+                        {getPageNumbers()[0] > 1 && (
                             <>
                                 <button
-                                    onClick={() => handlePageChange(0)}
+                                    onClick={() => handlePageChange(1)}
                                     className="w-12 h-12 rounded-lg border border-gray-300 text-gray-700 hover:bg-teal-50 hover:border-teal-300 transition-all duration-200 font-medium"
                                 >
                                     1
                                 </button>
-                                {getPageNumbers()[0] > 1 && (
+                                {getPageNumbers()[0] > 2 && (
                                     <span className="px-2 text-gray-500">...</span>
                                 )}
                             </>
@@ -241,23 +237,23 @@ export default function HomePage() {
                             <button
                                 key={pageNum}
                                 onClick={() => handlePageChange(pageNum)}
-                                className={`w-12 h-12 rounded-lg border transition-all duration-200 font-medium ${currentPage === pageNum
-                                    ? 'bg-gradient-to-r from-teal-500 to-blue-600 text-white border-teal-500 shadow-lg'
+                                className={`w-10 h-10 rounded-lg border transition-all duration-200 font-medium ${currentPageUI === pageNum
+                                    ? 'bg-gradient-to-r text-gray-700 border-teal-500 shadow-lg'
                                     : 'border-gray-300 text-gray-700 hover:bg-teal-50 hover:border-teal-300'
                                     }`}
                             >
-                                {pageNum + 1}
+                                {pageNum}
                             </button>
                         ))}
 
                         {/* Last page if not visible */}
-                        {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
+                        {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
                             <>
-                                {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 2 && (
+                                {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
                                     <span className="px-2 text-gray-500">...</span>
                                 )}
                                 <button
-                                    onClick={() => handlePageChange(totalPages - 1)}
+                                    onClick={() => handlePageChange(totalPages)}
                                     className="w-12 h-12 rounded-lg border border-gray-300 text-gray-700 hover:bg-teal-50 hover:border-teal-300 transition-all duration-200 font-medium"
                                 >
                                     {totalPages}
@@ -267,8 +263,8 @@ export default function HomePage() {
 
                         {/* Next button */}
                         <button
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages - 1}
+                            onClick={() => handlePageChange(currentPageUI + 1)}
+                            disabled={currentPageUI === totalPages}
                             className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-teal-50 hover:border-teal-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                         >
                             ›

@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
               We are dedicated to providing the best user experience with our modern React application.
             </p>
           </div>
-          
+
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
@@ -20,7 +20,7 @@ const Footer: React.FC = () => {
               <li><a href="/dashboard" className="text-gray-300 hover:text-white">Dashboard</a></li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact</h3>
             <p className="text-gray-300">
@@ -29,7 +29,7 @@ const Footer: React.FC = () => {
             </p>
           </div>
         </div>
-        
+
         <div className="border-t border-gray-700 mt-8 pt-8 text-center">
           <p className="text-gray-300">
             © 2024 My React App. All rights reserved.

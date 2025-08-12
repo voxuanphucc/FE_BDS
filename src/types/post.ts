@@ -94,6 +94,7 @@ export interface PostListData {
   items: PostSummary[];
   page: number;
   total: number;
+  totalPage: number;
   hasMore: boolean;
 }
 

@@ -22,19 +22,13 @@ const RegisterPage = () => {
         setLoading(true);
 
         try {
-            const data = await authService.register({ 
-                name, 
-                email: mail, 
+            await authService.register({
+                name,
+                email: mail,
                 password,
                 roleName,
                 phone
             });
-            
-            // Lưu token sau khi đăng ký thành công
-            localStorage.setItem('authToken', data.token);
-            if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
-            localStorage.setItem('userData', JSON.stringify(data.user));
-            
             alert('Đăng ký thành công!');
             navigate('/'); // Redirect về trang chủ
         } catch (error) {

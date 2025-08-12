@@ -1,6 +1,6 @@
 // Authentication related types
 export interface LoginCredentials {
-  email: string;
+  phone: string;
   password: string;
   rememberMe?: boolean;
 }

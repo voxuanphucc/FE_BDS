@@ -14,12 +14,17 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('authToken');
-    if (token) {
+    const requiresAuth = config.headers.requiresAuth !== false;
+
+    if (token && requiresAuth) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      delete config.headers.Authorization;
     }
+
     return config;
   },
-  (error) => Promise.reject(error)
+
 );
 
 // Response interceptor

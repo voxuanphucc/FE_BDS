@@ -13,12 +13,11 @@ const LoginPage = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            const data = await authService.login({ email: phone, password });
+            const data = await authService.login({ phone, password });
 
             // Lưu token/refreshToken và thông tin user
             localStorage.setItem('authToken', data.token);
             if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
-            localStorage.setItem('userData', JSON.stringify(data.user));
 
             alert('Đăng nhập thành công!');
             navigate('/');

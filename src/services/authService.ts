@@ -1,5 +1,11 @@
 import api from '../config/axios';
 import { LoginCredentials, RegisterData, AuthResponse } from '../types';
+import { AxiosError } from 'axios'; // Nhập AxiosError
+
+// Định nghĩa giao diện cho phản hồi lỗi từ API
+interface ApiErrorResponse {
+  message?: string;
+}
 
 class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
@@ -7,11 +13,11 @@ class AuthService {
       const response = await api.post('/auth/login', credentials);
       return response.data?.data as AuthResponse;
     } catch (error) {
-      throw this.handleError(error);
+      throw this.handleError(error as AxiosError<ApiErrorResponse>); // Sử dụng AxiosError với generic
     }
   }
 
-  async register(data: RegisterData): Promise<AuthResponse> {
+  async register(data: RegisterData): Promise<{ code: number; message: string }> {
     try {
       const payload = {
         name: data.name,
@@ -21,15 +27,14 @@ class AuthService {
         phone: data.phone || data.phoneNumber,
         roleName: data.roleName || data.role,
       };
-
       const response = await api.post('/auth/register', payload);
-      return response.data?.data as AuthResponse;
-    } catch (error: any) {
-      const serverMessage = error?.response?.data?.message;
+      return response.data; // Trả về { code, message }
+    } catch (error) {
+      const serverMessage = (error as AxiosError<ApiErrorResponse>)?.response?.data?.message; // Sử dụng AxiosError với generic
       if (serverMessage) {
         throw new Error(serverMessage);
       }
-      throw this.handleError(error);
+      throw this.handleError(error as AxiosError<ApiErrorResponse>); // Sử dụng AxiosError với generic
     }
   }
 
@@ -37,7 +42,7 @@ class AuthService {
     try {
       await api.post('/auth/logout');
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Lỗi đăng xuất:', error);
     }
   }
 
@@ -46,7 +51,7 @@ class AuthService {
       const response = await api.post('/auth/refresh');
       return response.data?.data as AuthResponse;
     } catch (error) {
-      throw this.handleError(error);
+      throw this.handleError(error as AxiosError<ApiErrorResponse>); // Sử dụng AxiosError với generic
     }
   }
 
@@ -55,18 +60,18 @@ class AuthService {
       const response = await api.get('/auth/me');
       return response.data?.data as AuthResponse['user'];
     } catch (error) {
-      throw this.handleError(error);
+      throw this.handleError(error as AxiosError<ApiErrorResponse>); // Sử dụng AxiosError với generic
     }
   }
 
-  private handleError(error: any): Error {
+  private handleError(error: AxiosError<ApiErrorResponse>): Error {
     if (error.response) {
-      const message = error.response.data?.message || error.response.statusText || 'An error occurred';
+      const message = error.response.data?.message || error.response.statusText || 'Đã xảy ra lỗi';
       return new Error(message);
     } else if (error.request) {
-      return new Error('Network error. Please check your connection.');
+      return new Error('Lỗi mạng. Vui lòng kiểm tra kết nối của bạn.');
     } else {
-      return new Error('An unexpected error occurred.');
+      return new Error('Đã xảy ra lỗi không mong muốn.');
     }
   }
 }

@@ -1,8 +1,8 @@
 import api from '../config/axios';
-import { Post, PostSummary, CreatePostData, UpdatePostData, PostListResponse, SinglePostResponse } from '../types';
+import { Post, CreatePostData, UpdatePostData, PostListResponse, SinglePostResponse } from '../types';
 
 class PostService {
-  async getPosts(page = 1, size = 20): Promise<PostListResponse> {
+  async getPosts(page = 1, size = 10): Promise<PostListResponse> {
     try {
       const response = await api.get(`/posts/summary?page=${page}&size=${size}`);
       return response.data;

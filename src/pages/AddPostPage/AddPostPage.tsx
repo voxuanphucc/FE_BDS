@@ -1,13 +1,8 @@
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-    Home, 
-    Upload, 
-    X, 
-    Plus, 
-    Minus, 
-    ChevronDown, 
-    ChevronUp,
+import React, { useState } from 'react';
+import {
+    Home,
+    Upload,
+    X,
     Star,
     Ruler,
     DollarSign,
@@ -133,20 +128,6 @@ const AddPostPage: React.FC = () => {
         }));
     };
 
-    // Generate Cloudinary URL from public_id
-    const getCloudinaryUrl = (publicId: string, options = {}) => {
-        const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`;
-        const transformations = Object.entries({
-            f: 'auto',
-            q: 'auto',
-            w: 800,
-            h: 800,
-            c: 'limit',
-            ...options
-        }).map(([key, value]) => `${key}_${value}`).join(',');
-
-        return `${baseUrl}/${transformations}/${publicId}`;
-    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -207,7 +188,7 @@ const AddPostPage: React.FC = () => {
 
             // Call API using postService
             await postService.createPost(postData);
-            
+
             alert('Đăng tin thành công!');
 
             // Reset form after successful submission
@@ -430,7 +411,7 @@ const AddPostPage: React.FC = () => {
                             {/* Price and Location */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                    <label className="flex text-sm font-semibold text-gray-700 items-center gap-2">
                                         <DollarSign className="h-4 w-4 text-gray-600" />
                                         Giá (VND) <span className="text-red-500">*</span>
                                     </label>
@@ -446,7 +427,7 @@ const AddPostPage: React.FC = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                    <label className="flex text-sm font-semibold text-gray-700 items-center gap-2">
                                         <MapPin className="h-4 w-4 text-gray-600" />
                                         Hướng nhà
                                     </label>
@@ -472,7 +453,7 @@ const AddPostPage: React.FC = () => {
                             {/* Dimensions */}
                             <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                    <label className="flex text-sm font-semibold text-gray-700 items-center gap-2">
                                         <Ruler className="h-4 w-4 text-gray-600" />
                                         Diện tích (m²)
                                     </label>
@@ -566,7 +547,7 @@ const AddPostPage: React.FC = () => {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                    <label className="flex text-sm font-semibold text-gray-700 items-center gap-2">
                                         <Calendar className="h-4 w-4 text-gray-600" />
                                         Năm xây dựng
                                     </label>
