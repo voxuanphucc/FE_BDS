@@ -1,10 +1,37 @@
 import api from '../config/axios';
 import { Post, CreatePostData, UpdatePostData, PostListResponse, SinglePostResponse } from '../types';
 
+interface FilterParams {
+  city?: string;
+  priceFrom?: number;
+  priceTo?: number;
+  postType?: string;
+  page?: number;
+  size?: number;
+}
+
 class PostService {
   async getPosts(page = 1, size = 10): Promise<PostListResponse> {
     try {
       const response = await api.get(`/posts/summary?page=${page}&size=${size}`);
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async filterPosts(params: FilterParams): Promise<PostListResponse> {
+    try {
+      const queryParams = new URLSearchParams();
+      
+      if (params.city) queryParams.append('city', params.city);
+      if (params.priceFrom) queryParams.append('priceFrom', params.priceFrom.toString());
+      if (params.priceTo) queryParams.append('priceTo', params.priceTo.toString());
+      if (params.postType) queryParams.append('postType', params.postType);
+      if (params.page) queryParams.append('page', params.page.toString());
+      if (params.size) queryParams.append('size', params.size.toString());
+
+      const response = await api.get(`/posts/filter?${queryParams.toString()}`);
       return response.data;
     } catch (error) {
       throw this.handleError(error);

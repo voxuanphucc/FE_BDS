@@ -1,6 +1,7 @@
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import NavigationMenu from "../../components/layout/NavigationMenu";
+import Filter, { FilterData } from "../../components/ui/Filter";
 import { postService } from '../../services/postService';
 import { favoriteService } from '../../services/favoriteService';
 import { PostSummary } from '../../types';
@@ -9,6 +10,7 @@ export default function HomePage() {
     const [posts, setPosts] = useState<PostSummary[]>([]);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [filterLoading, setFilterLoading] = useState(false);
 
     // Sử dụng URLSearchParams để quản lý page query parameter
     const [searchParams] = useSearchParams();
@@ -17,15 +19,29 @@ export default function HomePage() {
     // Lấy page từ URL, default là 1 (UI hiển thị 1-based)
     const currentPageUI = parseInt(searchParams.get('page') || '1', 10);
 
-    const fetchPosts = async (pageNumberUI: number) => {
+    const fetchPosts = async (pageNumberUI: number, filters?: FilterData) => {
         setLoading(true);
         try {
             // Convert UI page (1-based) to API page (0-based)
             const apiPage = pageNumberUI - 1;
-            const data = await postService.getPosts(apiPage, 20);
-            setPosts(data.data.items);
-            // Sử dụng totalPage từ response
-            setTotalPages(data.data.totalPage);
+            
+            if (filters && (filters.postType || filters.realEstateType || filters.priceFrom || filters.priceTo)) {
+                // Use filter API
+                const data = await postService.filterPosts({
+                    page: apiPage,
+                    size: 20,
+                    postType: filters.postType || undefined,
+                    priceFrom: filters.priceFrom,
+                    priceTo: filters.priceTo
+                });
+                setPosts(data.data.items);
+                setTotalPages(data.data.totalPage);
+            } else {
+                // Use regular API
+                const data = await postService.getPosts(apiPage, 20);
+                setPosts(data.data.items);
+                setTotalPages(data.data.totalPage);
+            }
         } catch (err) {
             console.error('Error fetching posts:', err);
         } finally {
@@ -36,6 +52,18 @@ export default function HomePage() {
     useEffect(() => {
         fetchPosts(currentPageUI);
     }, [currentPageUI]);
+
+    const handleFilterApply = async (filters: FilterData) => {
+        setFilterLoading(true);
+        try {
+            await fetchPosts(1, filters); // Reset to page 1 when filtering
+            navigate('/'); // Reset URL to first page
+        } catch (error) {
+            console.error('Error applying filters:', error);
+        } finally {
+            setFilterLoading(false);
+        }
+    };
 
     const handlePageChange = (newPage: number) => {
         // Cập nhật URL với page parameter
@@ -126,6 +154,11 @@ export default function HomePage() {
             {/* Navigation Menu */}
             <div className="mb-10 flex justify-center">
                 <NavigationMenu />
+            </div>
+
+            {/* Filter Section */}
+            <div className="container mx-auto px-4 sm:px-14 lg:px-56 mb-8">
+                <Filter onApply={handleFilterApply} loading={filterLoading} />
             </div>
 
             {/* Latest Posts */}

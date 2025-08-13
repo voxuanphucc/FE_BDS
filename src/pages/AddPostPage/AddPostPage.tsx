@@ -12,6 +12,7 @@ import {
 import { uploadService } from '../../services/uploadService';
 import { postService } from '../../services/postService';
 import { CreatePostData } from '../../types';
+import FormSection from '../FormSection/FormSection';
 
 const AddPostPage: React.FC = () => {
     const [formData, setFormData] = useState<CreatePostData>({
@@ -272,14 +273,7 @@ const AddPostPage: React.FC = () => {
 
                     <div className="p-8 space-y-10">
                         {/* Post Rank Selection */}
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-3 pb-3 border-b-2 border-gray-100">
-                                <div className="p-2 bg-yellow-100 rounded-lg">
-                                    <Star className="h-5 w-5 text-yellow-600" />
-                                </div>
-                                <h2 className="text-2xl font-bold text-gray-800">Gói tin đăng</h2>
-                            </div>
-
+                        <FormSection title="Gói tin đăng" icon={Star}>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {postRankOptions.map((option) => (
                                     <label key={option.value} className="cursor-pointer">
@@ -301,17 +295,10 @@ const AddPostPage: React.FC = () => {
                                     </label>
                                 ))}
                             </div>
-                        </div>
+                        </FormSection>
 
                         {/* Basic Information */}
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-3 pb-3 border-b-2 border-gray-100">
-                                <div className="p-2 bg-gray-100 rounded-lg">
-                                    <Home className="h-5 w-5 text-gray-600" />
-                                </div>
-                                <h2 className="text-2xl font-bold text-gray-800">Thông tin cơ bản</h2>
-                            </div>
-
+                        <FormSection title="Thông tin cơ bản" icon={Home}>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="block text-sm font-semibold text-gray-700">
@@ -378,17 +365,10 @@ const AddPostPage: React.FC = () => {
                                     required
                                 />
                             </div>
-                        </div>
+                        </FormSection>
 
                         {/* Property Details */}
-                        <div className="space-y-6">
-                            <div className="flex items-center gap-3 pb-3 border-b-2 border-gray-100">
-                                <div className="p-2 bg-gray-100 rounded-lg">
-                                    <Ruler className="h-5 w-5 text-gray-600" />
-                                </div>
-                                <h2 className="text-2xl font-bold text-gray-800">Thông tin chi tiết</h2>
-                            </div>
-
+                        <FormSection title="Thông tin chi tiết" icon={Ruler}>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="block text-sm font-semibold text-gray-700">Pháp lý</label>
@@ -583,11 +563,10 @@ const AddPostPage: React.FC = () => {
                                     ))}
                                 </div>
                             </div>
-                        </div>
+                        </FormSection>
 
                         {/* Image Upload */}
-                        <div className="space-y-6">
-                            <h2 className="text-2xl font-semibold text-gray-900 border-b border-gray-200 pb-3">Hình ảnh</h2>
+                        <FormSection title="Hình ảnh" icon={Upload}>
                             <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
                                 <div className="flex flex-col items-center justify-center">
                                     <Upload className="h-16 w-16 text-gray-400 mb-4" />
@@ -637,7 +616,7 @@ const AddPostPage: React.FC = () => {
                                     </div>
                                 </div>
                             )}
-                        </div>
+                        </FormSection>
 
                         {/* Submit Buttons */}
                         <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
