@@ -4,11 +4,10 @@ import { useState } from "react";
 import LoginModal from '../dialog/LoginModal'; // tạo component riêng
 
 const Navbar: React.FC = () => {
-
   const [showLogin, setShowLogin] = useState(false);
 
   return (
-    <nav className="bg-white shadow-lg border-b border-gray-200">
+    <nav className="bg-white shadow-lg border-b border-gray-200 fixed top-0 w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -36,7 +35,6 @@ const Navbar: React.FC = () => {
                   setShowLogin(true); // mở modal trên desktop
                 }
               }}
-
               className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors border-2 border-gray-400 hover:border-gray-600"
             >
               Đăng nhập
@@ -46,9 +44,7 @@ const Navbar: React.FC = () => {
         </div>
       </div>
     </nav>
-
   );
 };
-
 
 export default Navbar;
