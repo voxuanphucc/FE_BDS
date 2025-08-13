@@ -7,30 +7,28 @@ interface FilterProps {
 }
 
 export interface FilterData {
-  postType: string;
-  realEstateType: string;
+  postType: string | null; // 'SALE' | 'RENT' | null
+  realEstateType: string | null; // 'HOUSE' | 'APARTMENT' | 'LAND' | null
   priceRange: string;
-  project: string;
-  city: string;
-  priceFrom?: number;
-  priceTo?: number;
+  city: string | null; // 'hanoi' | 'hcm' | 'DaNang' | 'cantho' | null
+  priceFrom?: number | null;
+  priceTo?: number | null;
 }
 
 const Filter: React.FC<FilterProps> = ({ onApply, loading = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [filters, setFilters] = useState<FilterData>({
-    postType: '',
-    realEstateType: '',
+    postType: null,
+    realEstateType: null,
     priceRange: '',
-    project: '',
-    city: ''
+    city: null
   });
 
   const [dropdownStates, setDropdownStates] = useState({
     postType: false,
     realEstateType: false,
     priceRange: false,
-    project: false
+    city: false
   });
 
   const filterRef = useRef<HTMLDivElement>(null);
@@ -43,7 +41,7 @@ const Filter: React.FC<FilterProps> = ({ onApply, loading = false }) => {
           postType: false,
           realEstateType: false,
           priceRange: false,
-          project: false
+          city: false
         });
       }
     };
@@ -60,9 +58,9 @@ const Filter: React.FC<FilterProps> = ({ onApply, loading = false }) => {
   ];
 
   const realEstateTypeOptions = [
-    { value: 'Nhà ở', label: '🏡 Nhà ở' },
-    { value: 'Chung cư', label: '🏢 Chung cư' },
-    { value: 'Đất nền', label: '🌳 Đất nền' }
+    { value: 'HOUSE', label: '🏡 Nhà ở' },
+    { value: 'APARTMENT', label: '🏢 Chung cư' },
+    { value: 'LAND', label: '🌳 Đất nền' }
   ];
 
   const priceRangeOptions = [
@@ -70,20 +68,13 @@ const Filter: React.FC<FilterProps> = ({ onApply, loading = false }) => {
     { value: '500-1000', label: '500 triệu - 1 tỷ', from: 500000000, to: 1000000000 },
     { value: '1000-2000', label: '1 tỷ - 2 tỷ', from: 1000000000, to: 2000000000 },
     { value: '2000-5000', label: '2 tỷ - 5 tỷ', from: 2000000000, to: 5000000000 },
-    { value: '5000+', label: 'Trên 5 tỷ', from: 5000000000, to: undefined }
-  ];
-
-  const projectOptions = [
-    { value: 'all', label: 'Tất cả dự án' },
-    { value: 'project1', label: 'Dự án A' },
-    { value: 'project2', label: 'Dự án B' },
-    { value: 'project3', label: 'Dự án C' }
+    { value: '5000+', label: 'Trên 5 tỷ', from: 5000000000, to: null } // null means no upper limit
   ];
 
   const cityOptions = [
     { value: 'hanoi', label: 'Hà Nội' },
     { value: 'hcm', label: 'TP. Hồ Chí Minh' },
-    { value: 'danang', label: 'Đà Nẵng' },
+    { value: 'DaNang', label: 'Đà Nẵng' },
     { value: 'cantho', label: 'Cần Thơ' }
   ];
 
@@ -106,7 +97,7 @@ const Filter: React.FC<FilterProps> = ({ onApply, loading = false }) => {
       priceFrom: selectedPriceRange?.from,
       priceTo: selectedPriceRange?.to
     };
-    
+    console.log('Applying filters:', filterData);
     onApply(filterData);
     setIsOpen(false);
   };
@@ -122,8 +113,6 @@ const Filter: React.FC<FilterProps> = ({ onApply, loading = false }) => {
         return realEstateTypeOptions.find(opt => opt.value === value)?.label || value;
       case 'priceRange':
         return priceRangeOptions.find(opt => opt.value === value)?.label || value;
-      case 'project':
-        return projectOptions.find(opt => opt.value === value)?.label || value;
       case 'city':
         return cityOptions.find(opt => opt.value === value)?.label || value;
       default:
@@ -151,7 +140,7 @@ const Filter: React.FC<FilterProps> = ({ onApply, loading = false }) => {
           <span>{filters.postType ? getDisplayText('postType') : 'Mua bán'}</span>
           <ChevronDown className="h-4 w-4" />
         </button>
-        
+
         {dropdownStates.postType && (
           <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
             {postTypeOptions.map((option) => (
@@ -180,7 +169,7 @@ const Filter: React.FC<FilterProps> = ({ onApply, loading = false }) => {
           <span>{filters.realEstateType ? getDisplayText('realEstateType') : 'Loại hình BĐS'}</span>
           <ChevronDown className="h-4 w-4" />
         </button>
-        
+
         {dropdownStates.realEstateType && (
           <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
             {realEstateTypeOptions.map((option) => (
@@ -209,7 +198,7 @@ const Filter: React.FC<FilterProps> = ({ onApply, loading = false }) => {
           <span>{filters.priceRange ? getDisplayText('priceRange') : 'Giá bán'}</span>
           <ChevronDown className="h-4 w-4" />
         </button>
-        
+
         {dropdownStates.priceRange && (
           <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
             {priceRangeOptions.map((option) => (
@@ -229,29 +218,29 @@ const Filter: React.FC<FilterProps> = ({ onApply, loading = false }) => {
         )}
       </div>
 
-      {/* Project Dropdown */}
+      {/* city Dropdown */}
       <div className="relative">
         <button
-          onClick={() => toggleDropdown('project')}
+          onClick={() => toggleDropdown('city')}
           className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors min-w-[100px]"
         >
-          <span>{filters.project ? getDisplayText('project') : 'Dự án'}</span>
+          <span>{filters.city ? getDisplayText('city') : 'Dự án'}</span>
           <ChevronDown className="h-4 w-4" />
         </button>
-        
-        {dropdownStates.project && (
+
+        {dropdownStates.city && (
           <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-            {projectOptions.map((option) => (
+            {cityOptions.map((option) => (
               <button
                 key={option.value}
                 onClick={() => {
-                  handleFilterChange('project', option.value);
-                  toggleDropdown('project');
+                  handleFilterChange('city', option.value);
+                  toggleDropdown('city');
                 }}
                 className="flex items-center justify-between w-full px-4 py-2 text-left hover:bg-gray-50"
               >
                 <span>{option.label}</span>
-                {filters.project === option.value && <Check className="h-4 w-4 text-blue-600" />}
+                {filters.city === option.value && <Check className="h-4 w-4 text-blue-600" />}
               </button>
             ))}
           </div>

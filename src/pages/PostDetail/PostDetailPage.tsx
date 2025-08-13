@@ -48,7 +48,7 @@ const PostDetailPage: React.FC = () => {
 
     const fetchPost = async () => {
         if (!postId) return;
-        
+
         setLoading(true);
         setError('');
 
@@ -481,17 +481,6 @@ const PostDetailPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Additional Info */}
-                            {post.yearBuilt && (
-                                <div className="mt-6 pt-6 border-t">
-                                    <div className="flex items-center gap-3">
-                                        <Calendar className="h-5 w-5 text-gray-400" />
-                                        <span className="text-gray-600">
-                                            Năm xây dựng: <span className="font-semibold">{new Date(post.yearBuilt).getFullYear()}</span>
-                                        </span>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
 

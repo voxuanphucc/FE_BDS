@@ -4,6 +4,7 @@ export interface Post {
   postType: string;
   thumbnailUrl: string;
   realEstateType: string;
+  city: string;
   title: string;
   content?: string; // Optional vì API có thể không trả về
   status: string;
@@ -18,7 +19,6 @@ export interface Post {
   bedrooms?: number | null;
   bathrooms?: number | null;
   floors?: number | null;
-  yearBuilt?: string;
   diningRoom: boolean;
   kitchen: boolean;
   rooftop: boolean;
@@ -31,6 +31,7 @@ export interface PostSummary {
   id: string;
   postRank: string;
   postType: string;
+  city: string;
   thumbnailUrl: string;
   realEstateType: string;
   title: string;
@@ -53,6 +54,7 @@ export interface PostSummary {
 export interface CreatePostData {
   postRank: string;
   postType: string;
+  city: string;
   thumbnailUrl: string;
   realEstateType: string;
   title: string;
@@ -67,7 +69,6 @@ export interface CreatePostData {
   bedrooms?: number | null;
   bathrooms?: number | null;
   floors?: number | null;
-  yearBuilt?: string | null;
   diningRoom: boolean;
   kitchen: boolean;
   rooftop: boolean;

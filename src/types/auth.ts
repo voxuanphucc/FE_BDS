@@ -9,8 +9,6 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
-  roleName?: string;
-  role?: string;
   phone?: string;
   phoneNumber?: string;
   confirmPassword?: string;

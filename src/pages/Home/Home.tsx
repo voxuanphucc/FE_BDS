@@ -24,15 +24,17 @@ export default function HomePage() {
         try {
             // Convert UI page (1-based) to API page (0-based)
             const apiPage = pageNumberUI - 1;
-            
+
             if (filters && (filters.postType || filters.realEstateType || filters.priceFrom || filters.priceTo)) {
                 // Use filter API
                 const data = await postService.filterPosts({
                     page: apiPage,
                     size: 20,
-                    postType: filters.postType || undefined,
-                    priceFrom: filters.priceFrom,
-                    priceTo: filters.priceTo
+                    realEstateType: filters.realEstateType,
+                    postType: filters.postType,
+                    city: filters.city,
+                    priceFrom: filters.priceFrom ? filters.priceFrom : null,
+                    priceTo: filters.priceTo ? filters.priceTo : null
                 });
                 setPosts(data.data.items);
                 setTotalPages(data.data.totalPage);

@@ -25,7 +25,6 @@ class AuthService {
         email: data.email,
         password: data.password,
         phone: data.phone || data.phoneNumber,
-        roleName: data.roleName || data.role,
       };
       const response = await api.post('/auth/register', payload);
       return response.data; // Trả về { code, message }

@@ -2,10 +2,11 @@ import api from '../config/axios';
 import { Post, CreatePostData, UpdatePostData, PostListResponse, SinglePostResponse } from '../types';
 
 interface FilterParams {
-  city?: string;
-  priceFrom?: number;
-  priceTo?: number;
-  postType?: string;
+  city?: string | null; // 'hanoi' | 'hcm' | 'DaNang' | 'cantho' | null
+  realEstateType?: string | null; // 'HOUSE' | 'APARTMENT' | 'LAND' | null
+  priceFrom?: number | null;
+  priceTo?: number | null;
+  postType?: string | null; // 'SALE' | 'RENT' | null
   page?: number;
   size?: number;
 }
@@ -23,17 +24,27 @@ class PostService {
   async filterPosts(params: FilterParams): Promise<PostListResponse> {
     try {
       const queryParams = new URLSearchParams();
-      
+
       if (params.city) queryParams.append('city', params.city);
       if (params.priceFrom) queryParams.append('priceFrom', params.priceFrom.toString());
       if (params.priceTo) queryParams.append('priceTo', params.priceTo.toString());
       if (params.postType) queryParams.append('postType', params.postType);
       if (params.page) queryParams.append('page', params.page.toString());
       if (params.size) queryParams.append('size', params.size.toString());
-
-      const response = await api.get(`/posts/filter?${queryParams.toString()}`);
+      if (params.realEstateType) queryParams.append('realEstateType', params.realEstateType);
+      const response = await api.get(`/posts/summary/filtered?${queryParams.toString()}`);
       return response.data;
     } catch (error) {
+      const queryParams = new URLSearchParams();
+
+      if (params.city) queryParams.append('city', params.city);
+      if (params.priceFrom) queryParams.append('priceFrom', params.priceFrom.toString());
+      if (params.priceTo) queryParams.append('priceTo', params.priceTo.toString());
+      if (params.postType) queryParams.append('postType', params.postType);
+      if (params.page) queryParams.append('page', params.page.toString());
+      if (params.size) queryParams.append('size', params.size.toString());
+      console.error(`Error filtering posts with params: ${queryParams.toString()}`);
+      console.error('Error filtering posts:', error);
       throw this.handleError(error);
     }
   }
@@ -45,6 +56,7 @@ class PostService {
       const apiResponse: SinglePostResponse = response.data;
       return apiResponse.data;
     } catch (error) {
+      console.error(`Error fetching post with ID ${id}:`, error);
       throw this.handleError(error);
     }
   }

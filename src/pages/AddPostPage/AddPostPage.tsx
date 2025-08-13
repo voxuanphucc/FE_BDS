@@ -18,6 +18,7 @@ const AddPostPage: React.FC = () => {
     const [formData, setFormData] = useState<CreatePostData>({
         postRank: 'COPPER',
         postType: '',
+        city: '',
         thumbnailUrl: '',
         realEstateType: '',
         title: '',
@@ -32,7 +33,6 @@ const AddPostPage: React.FC = () => {
         bedrooms: null,
         bathrooms: null,
         floors: null,
-        yearBuilt: null,
         diningRoom: false,
         kitchen: false,
         rooftop: false,
@@ -158,6 +158,7 @@ const AddPostPage: React.FC = () => {
                 // Post info
                 postRank: formData.postRank,
                 postType: formData.postType,
+                city: formData.city,
                 thumbnailUrl: formData.thumbnailUrl,
                 realEstateType: formData.realEstateType,
                 title: formData.title,
@@ -174,7 +175,6 @@ const AddPostPage: React.FC = () => {
                 bedrooms: formData.bedrooms,
                 bathrooms: formData.bathrooms,
                 floors: formData.floors,
-                yearBuilt: formData.yearBuilt,
                 diningRoom: formData.diningRoom,
                 kitchen: formData.kitchen,
                 rooftop: formData.rooftop,
@@ -196,6 +196,7 @@ const AddPostPage: React.FC = () => {
             setFormData({
                 postRank: 'COPPER',
                 postType: '',
+                city: '',
                 thumbnailUrl: '',
                 realEstateType: '',
                 title: '',
@@ -210,7 +211,6 @@ const AddPostPage: React.FC = () => {
                 bedrooms: null,
                 bathrooms: null,
                 floors: null,
-                yearBuilt: null,
                 diningRoom: false,
                 kitchen: false,
                 rooftop: false,
@@ -232,6 +232,7 @@ const AddPostPage: React.FC = () => {
         setFormData({
             postRank: 'COPPER',
             postType: '',
+            city: '',
             thumbnailUrl: '',
             realEstateType: '',
             title: '',
@@ -246,7 +247,6 @@ const AddPostPage: React.FC = () => {
             bedrooms: null,
             bathrooms: null,
             floors: null,
-            yearBuilt: null,
             diningRoom: false,
             kitchen: false,
             rooftop: false,
@@ -329,9 +329,9 @@ const AddPostPage: React.FC = () => {
                                         required
                                     >
                                         <option value="">Chọn loại bất động sản</option>
-                                        <option value="Nhà ở">🏡 Nhà ở</option>
-                                        <option value="Chung cư">🏢 Chung cư</option>
-                                        <option value="Đất nề">🌳 Đất nền</option>
+                                        <option value="HOUSE">🏡 Nhà ở</option>
+                                        <option value="APARTMENT">🏢 Chung cư</option>
+                                        <option value="LAND">🌳 Đất nền</option>
                                     </select>
                                 </div>
                             </div>
@@ -384,6 +384,18 @@ const AddPostPage: React.FC = () => {
                                         <option value="SALES_CONTRACT">📋 Hợp đồng mua bán</option>
                                         <option value="WAITING_FOR_BOOK">⏰ Chờ sổ</option>
                                         <option value="OTHER">📄 Khác</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-semibold text-gray-700">Tỉnh thành</label>
+                                    <select
+                                        name="city"
+                                        value={formData.city || ''}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
+                                    >
+                                        <option value="">Chọn tỉnh thành</option>
+                                        <option value="DaNang">Đà nẵng</option>
                                     </select>
                                 </div>
                             </div>
@@ -526,19 +538,6 @@ const AddPostPage: React.FC = () => {
                                     />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="flex text-sm font-semibold text-gray-700 items-center gap-2">
-                                        <Calendar className="h-4 w-4 text-gray-600" />
-                                        Năm xây dựng
-                                    </label>
-                                    <input
-                                        type="date"
-                                        name="yearBuilt"
-                                        value={formData.yearBuilt || ''}
-                                        onChange={handleInputChange}
-                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
-                                    />
-                                </div>
                             </div>
                             <div>
                                 <h3 className="text-lg font-medium text-gray-900 mb-4">Tiện nghi</h3>

@@ -4,10 +4,9 @@ import { User, Mail, Lock, Phone } from 'lucide-react';
 import { authService } from '../../services/authService';
 
 const RegisterPage = () => {
-    const [roleName, setRoleName] = useState('');
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
-    const [mail, setMail] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -24,9 +23,8 @@ const RegisterPage = () => {
         try {
             await authService.register({
                 name,
-                email: mail,
+                email,
                 password,
-                roleName,
                 phone
             });
             alert('Đăng ký thành công!');
@@ -45,18 +43,6 @@ const RegisterPage = () => {
                 <h1 className="text-3xl font-bold text-gray-900 text-center">Đăng ký</h1>
 
                 <form onSubmit={handleRegister} className="space-y-4">
-                    <div className="relative">
-                        <select
-                            value={roleName}
-                            onChange={(e) => setRoleName(e.target.value)}
-                            className="w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
-                            required
-                        >
-                            <option value="">Chọn vai trò</option>
-                            <option value="USER">User</option>
-                            <option value="ADMIN">Admin</option>
-                        </select>
-                    </div>
 
                     <div className="relative">
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -88,11 +74,10 @@ const RegisterPage = () => {
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                         <input
                             type="email"
-                            placeholder="Email"
-                            value={mail}
-                            onChange={(e) => setMail(e.target.value)}
+                            placeholder="Email (không bắt buộc)"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             className="w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
-                            required
                         />
                     </div>
 
