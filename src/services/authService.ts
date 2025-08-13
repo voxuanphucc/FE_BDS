@@ -21,14 +21,15 @@ class AuthService {
     try {
       const payload = {
         name: data.name,
-        username: data.name,
         email: data.email,
         password: data.password,
+        confirmPassword: data.confirmPassword,
         phone: data.phone || data.phoneNumber,
       };
       const response = await api.post('/auth/register', payload);
       return response.data; // Trả về { code, message }
     } catch (error) {
+      console.error('Lỗi đăng ký:', error);
       const serverMessage = (error as AxiosError<ApiErrorResponse>)?.response?.data?.message; // Sử dụng AxiosError với generic
       if (serverMessage) {
         throw new Error(serverMessage);

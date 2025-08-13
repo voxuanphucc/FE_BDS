@@ -401,7 +401,7 @@ const AddPostPage: React.FC = () => {
                             </div>
 
                             {/* Price and Location */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="flex text-sm font-semibold text-gray-700 items-center gap-2">
                                         <DollarSign className="h-4 w-4 text-gray-600" />
