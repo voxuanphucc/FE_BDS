@@ -6,8 +6,7 @@ import {
     Star,
     Ruler,
     DollarSign,
-    MapPin,
-    Calendar
+    MapPin
 } from 'lucide-react';
 import { uploadService } from '../../services/uploadService';
 import { postService } from '../../services/postService';

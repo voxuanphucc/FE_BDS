@@ -22,7 +22,6 @@ export const config = {
   IS_TEST: ((import.meta as any).env?.MODE || '').toLowerCase() === 'test',
 };
 
-// Validate required environment variables
 export const validateEnvironment = () => {
   const requiredVars = ['VITE_API_URL'];
 

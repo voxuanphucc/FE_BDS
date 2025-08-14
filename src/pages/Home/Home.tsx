@@ -25,7 +25,7 @@ export default function HomePage() {
             // Convert UI page (1-based) to API page (0-based)
             const apiPage = pageNumberUI - 1;
 
-            if (filters && (filters.postType || filters.realEstateType || filters.priceFrom || filters.priceTo)) {
+            if (filters && (filters.postType || filters.realEstateType || filters.city || filters.priceFrom !== null || filters.priceTo !== null)) {
                 // Use filter API
                 const data = await postService.filterPosts({
                     page: apiPage,
@@ -33,8 +33,8 @@ export default function HomePage() {
                     realEstateType: filters.realEstateType,
                     postType: filters.postType,
                     city: filters.city,
-                    priceFrom: filters.priceFrom ? filters.priceFrom : null,
-                    priceTo: filters.priceTo ? filters.priceTo : null
+                    priceFrom: filters.priceFrom,
+                    priceTo: filters.priceTo
                 });
                 setPosts(data.data.items);
                 setTotalPages(data.data.totalPage);
@@ -56,6 +56,11 @@ export default function HomePage() {
     }, [currentPageUI]);
 
     const handleFilterApply = async (filters: FilterData) => {
+        console.log('=== FILTER APPLY DEBUG ===');
+        console.log('Filters received:', filters);
+        console.log('Price filter values:', { priceFrom: filters.priceFrom, priceTo: filters.priceTo });
+        console.log('==========================');
+        
         setFilterLoading(true);
         try {
             await fetchPosts(1, filters); // Reset to page 1 when filtering

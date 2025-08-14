@@ -27,13 +27,27 @@ class AuthService {
         phone: data.phone || data.phoneNumber,
       };
       const response = await api.post('/auth/register', payload);
+    
       return response.data; // Trả về { code, message }
     } catch (error) {
-      const serverMessage = (error as AxiosError<ApiErrorResponse>)?.response?.data?.message; // Sử dụng AxiosError với generic
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      
+      // Xử lý lỗi 409 Conflict cụ thể
+      if (axiosError.response?.status === 409) {
+        const serverMessage = axiosError.response.data?.message;
+        if (serverMessage) {
+          throw new Error(`409 Conflict: ${serverMessage}`);
+        } else {
+          throw new Error('409 Conflict: Thông tin đăng ký đã tồn tại trong hệ thống');
+        }
+      }
+      
+      // Xử lý các lỗi khác
+      const serverMessage = axiosError?.response?.data?.message;
       if (serverMessage) {
         throw new Error(serverMessage);
       }
-      throw this.handleError(error as AxiosError<ApiErrorResponse>); // Sử dụng AxiosError với generic
+      throw this.handleError(axiosError);
     }
   }
 

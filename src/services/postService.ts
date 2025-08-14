@@ -1,3 +1,4 @@
+
 import api from '../config/axios';
 import { Post, CreatePostData, UpdatePostData, PostListResponse, SinglePostResponse } from '../types';
 

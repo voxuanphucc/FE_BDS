@@ -30,8 +30,22 @@ const RegisterPage = () => {
             alert('Đăng ký thành công!');
             navigate('/'); // Redirect về trang chủ
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định';
-            alert('Đăng ký thất bại: ' + errorMessage);
+            let errorMessage = 'Lỗi không xác định';
+            
+            if (error instanceof Error) {
+                errorMessage = error.message;
+                
+                // Xử lý các loại lỗi cụ thể
+                if (errorMessage.includes('409') || errorMessage.includes('Conflict')) {
+                    errorMessage = 'Thông tin đăng ký đã tồn tại! Vui lòng kiểm tra:\n• Email đã được sử dụng\n• Username đã tồn tại\n• Số điện thoại đã được đăng ký';
+                } else if (errorMessage.includes('400') || errorMessage.includes('Bad Request')) {
+                    errorMessage = 'Dữ liệu không hợp lệ! Vui lòng kiểm tra lại thông tin.';
+                } else if (errorMessage.includes('500') || errorMessage.includes('Internal Server Error')) {
+                    errorMessage = 'Lỗi server! Vui lòng thử lại sau.';
+                }
+            }
+            
+            alert('Đăng ký thất bại:\n\n' + errorMessage);
         } finally {
             setLoading(false);
         }
