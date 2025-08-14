@@ -1,6 +1,6 @@
 import api from '../config/axios';
 import { LoginCredentials, RegisterData, AuthResponse } from '../types';
-import { AxiosError } from 'axios'; // Nhập AxiosError
+import { AxiosError } from 'axios';
 
 // Định nghĩa giao diện cho phản hồi lỗi từ API
 interface ApiErrorResponse {
@@ -13,7 +13,7 @@ class AuthService {
       const response = await api.post('/auth/login', credentials);
       return response.data?.data as AuthResponse;
     } catch (error) {
-      throw this.handleError(error as AxiosError<ApiErrorResponse>); // Sử dụng AxiosError với generic
+      throw this.handleError(error as AxiosError<ApiErrorResponse>);
     }
   }
 
@@ -24,7 +24,7 @@ class AuthService {
         username: data.name,
         email: data.email,
         password: data.password,
-        phone: data.phone || data.phoneNumber,
+        phone: data.phone,
       };
       const response = await api.post('/auth/register', payload);
     
@@ -64,7 +64,7 @@ class AuthService {
       const response = await api.post('/auth/refresh');
       return response.data?.data as AuthResponse;
     } catch (error) {
-      throw this.handleError(error as AxiosError<ApiErrorResponse>); // Sử dụng AxiosError với generic
+      throw this.handleError(error as AxiosError<ApiErrorResponse>);
     }
   }
 
@@ -73,7 +73,7 @@ class AuthService {
       const response = await api.get('/auth/me');
       return response.data?.data as AuthResponse['user'];
     } catch (error) {
-      throw this.handleError(error as AxiosError<ApiErrorResponse>); // Sử dụng AxiosError với generic
+      throw this.handleError(error as AxiosError<ApiErrorResponse>);
     }
   }
 

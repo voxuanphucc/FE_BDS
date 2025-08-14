@@ -14,10 +14,10 @@ const RegisterPage = () => {
 
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (password !== confirmPassword) {
-            alert('Mật khẩu xác nhận không khớp!');
-            return;
-        }
+        // if (password != confirmPassword) {
+        //     alert('Mật khẩu xác nhận không khớp!');
+        //     return;
+        // }
         setLoading(true);
 
         try {
@@ -25,6 +25,7 @@ const RegisterPage = () => {
                 name,
                 email,
                 password,
+                confirmPassword,
                 phone
             });
             alert('Đăng ký thành công!');
