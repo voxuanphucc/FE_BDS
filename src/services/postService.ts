@@ -34,6 +34,7 @@ class PostService {
       if (params.size) queryParams.append('size', params.size.toString());
       if (params.realEstateType) queryParams.append('realEstateType', params.realEstateType);
       const response = await api.get(`/posts/summary/filtered?${queryParams.toString()}`);
+      console.log(`Filtering posts with params: ${queryParams.toString()}`);
       return response.data;
     } catch (error) {
       const queryParams = new URLSearchParams();

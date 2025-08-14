@@ -11,6 +11,7 @@ export default function HomePage() {
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
     const [filterLoading, setFilterLoading] = useState(false);
+    const [currentFilters, setCurrentFilters] = useState<FilterData | null>(null); // Track active filters
 
     // Sử dụng URLSearchParams để quản lý page query parameter
     const [searchParams] = useSearchParams();
@@ -26,6 +27,16 @@ export default function HomePage() {
             const apiPage = pageNumberUI - 1;
 
             if (filters && (filters.postType || filters.realEstateType || filters.city || filters.priceFrom !== null || filters.priceTo !== null)) {
+                console.log('🔍 Calling filter API with:', {
+                    page: apiPage,
+                    size: 20,
+                    realEstateType: filters.realEstateType,
+                    postType: filters.postType,
+                    city: filters.city,
+                    priceFrom: filters.priceFrom,
+                    priceTo: filters.priceTo
+                });
+
                 // Use filter API
                 const data = await postService.filterPosts({
                     page: apiPage,
@@ -36,31 +47,46 @@ export default function HomePage() {
                     priceFrom: filters.priceFrom,
                     priceTo: filters.priceTo
                 });
+
+                console.log('✅ Filter API response:', data);
                 setPosts(data.data.items);
                 setTotalPages(data.data.totalPage);
+                setCurrentFilters(filters); // Save current filters
             } else {
+                console.log('📋 Calling regular API with page:', apiPage);
+
                 // Use regular API
                 const data = await postService.getPosts(apiPage, 20);
+
+                console.log('✅ Regular API response:', data);
                 setPosts(data.data.items);
                 setTotalPages(data.data.totalPage);
+                setCurrentFilters(null); // Clear filters when using regular API
             }
         } catch (err) {
-            console.error('Error fetching posts:', err);
+            console.error('❌ Error fetching posts:', err);
+            // Show user-friendly error message
+            alert('Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại!');
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchPosts(currentPageUI);
-    }, [currentPageUI]);
+        // When page changes, use current filters if any
+        if (currentFilters) {
+            fetchPosts(currentPageUI, currentFilters);
+        } else {
+            fetchPosts(currentPageUI);
+        }
+    }, [currentPageUI, currentFilters]);
 
     const handleFilterApply = async (filters: FilterData) => {
         console.log('=== FILTER APPLY DEBUG ===');
         console.log('Filters received:', filters);
         console.log('Price filter values:', { priceFrom: filters.priceFrom, priceTo: filters.priceTo });
         console.log('==========================');
-        
+
         setFilterLoading(true);
         try {
             await fetchPosts(1, filters); // Reset to page 1 when filtering
@@ -82,6 +108,13 @@ export default function HomePage() {
         }
         // Scroll to top when changing page
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Clear filters function
+    const handleClearFilters = () => {
+        setCurrentFilters(null);
+        fetchPosts(1); // Fetch first page without filters
+        navigate('/'); // Reset URL
     };
 
     // Tạo array các số trang để hiển thị (UI 1-based)
@@ -157,7 +190,6 @@ export default function HomePage() {
                 </div>
             </div>
 
-            {/* Statistics Section */}
             {/* Navigation Menu */}
             <div className="mb-10 flex justify-center">
                 <NavigationMenu />
@@ -166,18 +198,50 @@ export default function HomePage() {
             {/* Filter Section */}
             <div className="container mx-auto px-4 sm:px-14 lg:px-56 mb-8">
                 <Filter onApply={handleFilterApply} loading={filterLoading} />
+
+                {/* Filter Status & Clear Button */}
+                {currentFilters && (
+                    <div className="mt-4 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div className="flex items-center space-x-2 text-blue-700">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-sm font-medium">
+                                Đang áp dụng bộ lọc - Tìm thấy {posts.length} kết quả
+                            </span>
+                        </div>
+                        <button
+                            onClick={handleClearFilters}
+                            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                            Xóa bộ lọc
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Latest Posts */}
             <div className="container mx-auto px-4 sm:px-14 lg:px-56">
                 <h2 className="text-3xl font-bold mb-8 text-gray-800 flex items-center">
                     <span className="w-2 h-8 bg-gradient-to-b from-teal-500 to-teal-600 rounded-full mr-3 shadow-sm"></span>
-                    Tin đăng mới nhất
+                    {currentFilters ? 'Kết quả tìm kiếm' : 'Tin đăng mới nhất'}
                 </h2>
 
                 {loading ? (
                     <div className="flex justify-center items-center py-12">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-600"></div>
+                    </div>
+                ) : posts.length === 0 ? (
+                    <div className="text-center py-12">
+                        <div className="text-gray-500 text-lg mb-4">Không tìm thấy kết quả nào</div>
+                        {currentFilters && (
+                            <button
+                                onClick={handleClearFilters}
+                                className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                            >
+                                Xóa bộ lọc
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
