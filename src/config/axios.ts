@@ -23,8 +23,7 @@ api.interceptors.request.use(
     }
 
     return config;
-  },
-
+  }
 );
 
 // Response interceptor

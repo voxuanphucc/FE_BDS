@@ -14,10 +14,10 @@ const RegisterPage = () => {
 
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // if (password != confirmPassword) {
-        //     alert('Mật khẩu xác nhận không khớp!');
-        //     return;
-        // }
+        if (password !== confirmPassword) {
+            alert('Mật khẩu xác nhận không khớp!');
+            return;
+        }
         setLoading(true);
 
         try {
@@ -25,7 +25,6 @@ const RegisterPage = () => {
                 name,
                 email,
                 password,
-                confirmPassword,
                 phone
             });
             alert('Đăng ký thành công!');
@@ -89,10 +88,11 @@ const RegisterPage = () => {
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                         <input
                             type="email"
-                            placeholder="Email (không bắt buộc)"
+                            placeholder="Email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
+                            required
                         />
                     </div>
 

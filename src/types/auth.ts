@@ -9,8 +9,7 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
-  phone?: string;
-  phoneNumber?: string;
+  phone: string;
   confirmPassword?: string;
   acceptTerms?: boolean;
 }
