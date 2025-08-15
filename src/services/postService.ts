@@ -22,6 +22,7 @@ class PostService {
     }
   }
 
+
   async filterPosts(params: FilterParams): Promise<PostListResponse> {
     try {
       const queryParams = new URLSearchParams();

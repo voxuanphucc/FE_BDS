@@ -25,16 +25,17 @@ const RegisterPage = () => {
                 name,
                 email,
                 password,
+                confirmPassword,
                 phone
             });
             alert('Đăng ký thành công!');
             navigate('/'); // Redirect về trang chủ
         } catch (error) {
             let errorMessage = 'Lỗi không xác định';
-            
+
             if (error instanceof Error) {
                 errorMessage = error.message;
-                
+
                 // Xử lý các loại lỗi cụ thể
                 if (errorMessage.includes('409') || errorMessage.includes('Conflict')) {
                     errorMessage = 'Thông tin đăng ký đã tồn tại! Vui lòng kiểm tra:\n• Email đã được sử dụng\n• Username đã tồn tại\n• Số điện thoại đã được đăng ký';
@@ -44,7 +45,7 @@ const RegisterPage = () => {
                     errorMessage = 'Lỗi server! Vui lòng thử lại sau.';
                 }
             }
-            
+
             alert('Đăng ký thất bại:\n\n' + errorMessage);
         } finally {
             setLoading(false);
@@ -92,7 +93,6 @@ const RegisterPage = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all duration-200 bg-gray-50 hover:bg-white"
-                            required
                         />
                     </div>
 

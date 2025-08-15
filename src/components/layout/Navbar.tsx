@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useState } from "react";
-import LoginModal from '../dialog/LoginModal'; // tạo component riêng
+import LoginModal from '../dialog/LoginModal';
+import { getUserFromToken, UserPayload } from '../../utils/auth';
+
 
 const Navbar: React.FC = () => {
   const [showLogin, setShowLogin] = useState(false);
+  const [user, setUser] = useState<UserPayload | null>(null);
+
+  useEffect(() => {
+    const currentUser = getUserFromToken();
+    setUser(currentUser);
+  }, []);
 
   return (
     <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 w-full z-50">
@@ -18,27 +25,43 @@ const Navbar: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Link to="/" className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+            <Link to="/" className="hidden md:block text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
               Trang chủ
             </Link>
-            <Link to="/about" className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+            <Link to="/about" className="hidden md:block text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
               Giới thiệu
             </Link>
+
             <Link to="/add-post" className="bg-gray-600 text-white hover:bg-gray-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">
               Đăng tin
             </Link>
-            <button
-              onClick={() => {
-                if (window.innerWidth < 768) {
-                  window.location.href = '/login'; // chuyển trang trên mobile
-                } else {
-                  setShowLogin(true); // mở modal trên desktop
-                }
-              }}
-              className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors border-2 border-gray-400 hover:border-gray-600"
-            >
-              Đăng nhập
-            </button>
+
+            {user ? (
+              <div className="flex items-center space-x-2">
+                <Link to="/dashboard" className="flex items-center space-x-2 hover:opacity-90 transition-opacity">
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.userName}
+                    className="h-12 w-12 rounded-full object-cover border border-gray-300"
+                  />
+                  <span className="hidden md:block text-gray-800 font-medium text-sm">{user.userName}</span>
+                </Link>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  if (window.innerWidth < 768) {
+                    window.location.href = '/login';
+                  } else {
+                    setShowLogin(true);
+                  }
+                }}
+                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors border-2 border-gray-400 hover:border-gray-600"
+              >
+                Đăng nhập
+              </button>
+            )}
+
             {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
           </div>
         </div>

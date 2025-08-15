@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { config } from './env';
 
-
 const api = axios.create({
   baseURL: config.API_URL,
   timeout: config.API_TIMEOUT,
@@ -10,51 +9,46 @@ const api = axios.create({
   },
 });
 
-// Request interceptor
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('authToken');
-    const requiresAuth = config.headers.requiresAuth !== false;
-
-    if (token && requiresAuth) {
-      config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      delete config.headers.Authorization;
-    }
-
-    return config;
+// Hàm kiểm tra token hết hạn (giả sử là JWT)
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const exp = payload.exp;
+    if (!exp) return true;
+    const now = Math.floor(Date.now() / 1000);
+    return exp < now;
+  } catch {
+    return true;
   }
-);
+}
+
+// Request interceptor
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  const requiresAuth = config.headers.requiresAuth !== false;
+
+  if (token && requiresAuth) {
+    if (isTokenExpired(token)) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+      return Promise.reject(new Error('Token expired'));
+    }
+    config.headers.Authorization = `Bearer ${token}`;
+  } else {
+    delete config.headers.Authorization;
+  }
+
+  return config;
+});
 
 // Response interceptor
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest: any = error.config;
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (refreshToken) {
-          const response = await api.post('/auth/refresh', { refreshToken });
-          const data = response.data?.data || response.data;
-          const newAccessToken = data?.token || data?.accessToken;
-          const newRefreshToken = data?.refreshToken;
-          if (newAccessToken) {
-            localStorage.setItem('authToken', newAccessToken);
-            if (newRefreshToken) localStorage.setItem('refreshToken', newRefreshToken);
-            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-            return api(originalRequest);
-          }
-        }
-      } catch {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
-      }
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/';
     }
-
     return Promise.reject(error);
   }
 );

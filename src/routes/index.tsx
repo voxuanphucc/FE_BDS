@@ -5,10 +5,11 @@ import { Link } from "react-router-dom";
 import { privateRoutes } from './privateRoutes';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
+import { isTokenValid } from '../utils/auth';
 
 const AppRouter: React.FC = () => {
   // Mock authentication check - replace with actual auth logic
-  const isAuthenticated = false;
+  const isAuthenticated = isTokenValid();
 
   return (
     <BrowserRouter>
@@ -48,8 +49,6 @@ const AppRouter: React.FC = () => {
                   <div className="text-center">
                     <h1 className="text-4xl font-bold text-gray-900 mb-4">404</h1>
                     <p className="text-gray-600 mb-4">Page not found</p>
-
-
                     <Link
                       to="/"
                       className="text-blue-600 hover:text-blue-800 underline"

@@ -2,10 +2,10 @@ import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import Home from '../pages/Home/Home';
 import About from '../pages/About';
-import AddPostPage from '../pages/AddPostPage/AddPostPage';
 import PostDetailPage from '../pages/PostDetail/PostDetailPage';
 import LoginPage from '../pages/Login/LoginPage';
 import RegisterPage from '../pages/Register/RegisterPage';
+import Logout from '../pages/Logout/Logout';
 
 export const publicRoutes: RouteObject[] = [
   {
@@ -29,8 +29,8 @@ export const publicRoutes: RouteObject[] = [
     element: React.createElement(About),
   },
   {
-    path: '/add-post',
-    element: React.createElement(AddPostPage),
+    path: '/logout',
+    element: React.createElement(Logout),
   },
   {
     path: '/post/:postId',

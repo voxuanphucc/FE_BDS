@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Lock } from 'lucide-react';
 import { authService } from '../../services/authService';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
     onClose: () => void;
@@ -10,7 +11,7 @@ const LoginModal: React.FC<Props> = ({ onClose }) => {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-
+    const navigate = useNavigate();
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -19,10 +20,12 @@ const LoginModal: React.FC<Props> = ({ onClose }) => {
             localStorage.clear(); // Clear any previous tokens
             const data = await authService.login({ phone, password });
 
-            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('token', data.token);
             if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
             alert('Đăng nhập thành công!');
-            onClose();
+            navigate('/home');
+            window.location.reload();
+
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định';
             alert('Đăng nhập thất bại: ' + errorMessage);

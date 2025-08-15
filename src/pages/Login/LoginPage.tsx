@@ -7,7 +7,6 @@ const LoginPage = () => {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -17,11 +16,11 @@ const LoginPage = () => {
             const data = await authService.login({ phone, password });
 
             // Lưu token/refreshToken và thông tin user
-            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('token', data.token);
             if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
 
             alert('Đăng nhập thành công!');
-            navigate('/');
+            window.location.reload();
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Lỗi không xác định';
             alert('Đăng nhập thất bại: ' + message);

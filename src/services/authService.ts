@@ -21,17 +21,17 @@ class AuthService {
     try {
       const payload = {
         name: data.name,
-        username: data.name,
         email: data.email,
         password: data.password,
+        confirmPassword: data.confirmPassword,
         phone: data.phone,
       };
       const response = await api.post('/auth/register', payload);
-    
+
       return response.data; // Trả về { code, message }
     } catch (error) {
       const axiosError = error as AxiosError<ApiErrorResponse>;
-      
+
       // Xử lý lỗi 409 Conflict cụ thể
       if (axiosError.response?.status === 409) {
         const serverMessage = axiosError.response.data?.message;
@@ -41,7 +41,7 @@ class AuthService {
           throw new Error('409 Conflict: Thông tin đăng ký đã tồn tại trong hệ thống');
         }
       }
-      
+
       // Xử lý các lỗi khác
       const serverMessage = axiosError?.response?.data?.message;
       if (serverMessage) {

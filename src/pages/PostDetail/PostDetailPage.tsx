@@ -491,24 +491,33 @@ const PostDetailPage: React.FC = () => {
                             <div className="bg-white rounded-2xl shadow-lg p-6">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Liên hệ</h3>
 
-                                <div className="space-y-4">
-                                    {post.owner && (
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <Star className="h-4 w-4 text-yellow-500" />
-                                            <span className="text-green-600 font-medium">Chính chủ</span>
-                                        </div>
-                                    )}
+                                <div
+                                    className="
+    md:sticky md:top-20 md:right-0 md:w-[300px] 
+    fixed bottom-0 left-0 w-full bg-white p-4 shadow-md z-50
+    md:bg-transparent md:shadow-none
+  "
+                                >
+                                    <div className="space-y-4">
+                                        {post.owner && (
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <Star className="h-4 w-4 text-yellow-500" />
+                                                <span className="text-green-600 font-medium">Chính chủ</span>
+                                            </div>
+                                        )}
 
-                                    <button className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
-                                        <Phone className="h-4 w-4" />
-                                        <span>Gọi ngay</span>
-                                    </button>
+                                        <button className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                                            <Phone className="h-4 w-4" />
+                                            <span>Gọi ngay</span>
+                                        </button>
 
-                                    <button className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
-                                        <Mail className="h-4 w-4" />
-                                        <span>Gửi email</span>
-                                    </button>
+                                        <button className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                                            <Mail className="h-4 w-4" />
+                                            <span>Gửi email</span>
+                                        </button>
+                                    </div>
                                 </div>
+
                             </div>
 
                             {/* Price Summary */}

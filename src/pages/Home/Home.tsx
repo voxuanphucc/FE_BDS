@@ -1,5 +1,5 @@
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import NavigationMenu from "../../components/layout/NavigationMenu";
 import Filter, { FilterData } from "../../components/ui/Filter";
 import { postService } from '../../services/postService';
@@ -11,7 +11,7 @@ export default function HomePage() {
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
     const [filterLoading, setFilterLoading] = useState(false);
-    const [currentFilters, setCurrentFilters] = useState<FilterData | null>(null); // Track active filters
+    const [currentFilters, setCurrentFilters] = useState<FilterData | null>(null);
 
     // Sử dụng URLSearchParams để quản lý page query parameter
     const [searchParams] = useSearchParams();
@@ -20,7 +20,7 @@ export default function HomePage() {
     // Lấy page từ URL, default là 1 (UI hiển thị 1-based)
     const currentPageUI = parseInt(searchParams.get('page') || '1', 10);
 
-    const fetchPosts = async (pageNumberUI: number, filters?: FilterData) => {
+    const fetchPosts = useCallback(async (pageNumberUI: number, filters?: FilterData) => {
         setLoading(true);
         try {
             // Convert UI page (1-based) to API page (0-based)
@@ -51,7 +51,6 @@ export default function HomePage() {
                 console.log('✅ Filter API response:', data);
                 setPosts(data.data.items);
                 setTotalPages(data.data.totalPage);
-                setCurrentFilters(filters); // Save current filters
             } else {
                 console.log('📋 Calling regular API with page:', apiPage);
 
@@ -61,7 +60,6 @@ export default function HomePage() {
                 console.log('✅ Regular API response:', data);
                 setPosts(data.data.items);
                 setTotalPages(data.data.totalPage);
-                setCurrentFilters(null); // Clear filters when using regular API
             }
         } catch (err) {
             console.error('❌ Error fetching posts:', err);
@@ -70,35 +68,40 @@ export default function HomePage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
+    // Effect để load initial data và khi page thay đổi
     useEffect(() => {
-        // When page changes, use current filters if any
+        console.log('🔄 useEffect triggered - currentPageUI:', currentPageUI, 'currentFilters:', currentFilters);
         if (currentFilters) {
             fetchPosts(currentPageUI, currentFilters);
         } else {
             fetchPosts(currentPageUI);
         }
-    }, [currentPageUI, currentFilters]);
+    }, [currentPageUI, fetchPosts]); // Removed currentFilters from dependencies to prevent double call
 
     const handleFilterApply = async (filters: FilterData) => {
-        console.log('=== FILTER APPLY DEBUG ===');
+        console.log('=== FILTER APPLY START ===');
         console.log('Filters received:', filters);
         console.log('Price filter values:', { priceFrom: filters.priceFrom, priceTo: filters.priceTo });
-        console.log('==========================');
 
         setFilterLoading(true);
         try {
+            // Set filters first, then fetch
+            setCurrentFilters(filters);
             await fetchPosts(1, filters); // Reset to page 1 when filtering
             navigate('/'); // Reset URL to first page
+            console.log('✅ Filter applied successfully');
         } catch (error) {
-            console.error('Error applying filters:', error);
+            console.error('❌ Error applying filters:', error);
         } finally {
             setFilterLoading(false);
         }
+        console.log('=== FILTER APPLY END ===');
     };
 
     const handlePageChange = (newPage: number) => {
+        console.log('📄 Page change to:', newPage);
         // Cập nhật URL với page parameter
         if (newPage === 1) {
             // Nếu là trang đầu tiên, không cần page parameter
@@ -112,6 +115,7 @@ export default function HomePage() {
 
     // Clear filters function
     const handleClearFilters = () => {
+        console.log('🧹 Clearing filters');
         setCurrentFilters(null);
         fetchPosts(1); // Fetch first page without filters
         navigate('/'); // Reset URL
@@ -167,27 +171,67 @@ export default function HomePage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             {/* Hero Banner */}
-            <div className="relative bg-gradient-to-r from-gray-600 to-gray-800 rounded-2xl mx-4 mt-8 mb-8 p-8 shadow-xl">
-                <div className="relative z-10 flex items-center">
-                    <div className="bg-white rounded-full p-4 mr-6">
-                        <svg className="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6z" />
-                        </svg>
+            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-cyan-600 to-green-500 mx-2 mt-6 mb-10 rounded-xl shadow-2xl">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-48 -translate-y-48"></div>
+                    <div className="absolute bottom-0 right-0 w-80 h-80 bg-white rounded-full translate-x-40 translate-y-40"></div>
+                    <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-white rounded-full opacity-40"></div>
+                </div>
+
+                <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between p-8 lg:p-12">
+                    <div className="flex items-start flex-col max-w-2xl">
+                        {/* Icon với glow */}
+                        <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 mb-6 border border-white/30 shadow-xl">
+                            <svg className="w-12 h-12 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2L2 7v10c0 5.55 3.84 10 9 11 1.94-.34 3.84-1.15 5.55-2.36C19.16 24.65 22 20.2 22 17V7l-10-5z" />
+                                <path d="M12 4.5L4 8.5v8.5c0 4.1 2.84 7.4 6.5 8.3V4.5h1.5z" />
+                            </svg>
+                        </div>
+
+                        {/* Text */}
+                        <h1 className="text-2xl lg:text-5xl  font-bold text-white mb-4 leading-tight">
+                            Tìm Kiếm Bất Động Sản
+                            <span className="block text-2xl lg:text-3xl font-medium text-green-100 mt-2">
+                                Phù Hợp Với Bạn
+                            </span>
+                        </h1>
+
+                        {/* Search box */}
+                        <div className="mt-6 w-full max-w-md">
+                            <div className="flex bg-white rounded-2xl shadow-lg overflow-hidden">
+                                <input
+                                    type="text"
+                                    placeholder="Nhập địa điểm, dự án hoặc loại BĐS..."
+                                    className="flex-1 px-4 py-3 text-gray-700 outline-none"
+                                />
+                                <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 font-semibold">
+                                    Tìm kiếm
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-4xl font-bold text-white mb-2">Đăng Tin Bất Động Sản</h1>
-                        <p className="text-white text-lg opacity-90">
-                            Đăng tin nhanh chóng, hiệu quả và tiếp cận hàng ngàn khách hàng tiềm năng.
-                        </p>
+
+                    {/* Decorative Building */}
+                    <div className="hidden lg:block relative mt-10 lg:mt-0">
+                        <div className="w-48 h-48 relative transform rotate-6 hover:rotate-0 transition-transform duration-500">
+                            <div className="absolute bottom-0 left-6 w-10 h-32 bg-white/40 rounded-t-lg backdrop-blur-sm"></div>
+                            <div className="absolute bottom-0 left-20 w-12 h-40 bg-white/50 rounded-t-lg backdrop-blur-sm"></div>
+                            <div className="absolute bottom-0 left-36 w-10 h-36 bg-white/30 rounded-t-lg backdrop-blur-sm"></div>
+
+                            {/* Windows */}
+                            <div className="absolute bottom-6 left-8 w-2 h-2 bg-yellow-300 rounded-sm"></div>
+                            <div className="absolute bottom-10 left-8 w-2 h-2 bg-yellow-300 rounded-sm"></div>
+                            <div className="absolute bottom-14 left-22 w-2 h-2 bg-yellow-300 rounded-sm"></div>
+                            <div className="absolute bottom-18 left-22 w-2 h-2 bg-yellow-300 rounded-sm"></div>
+                        </div>
                     </div>
                 </div>
-                <div className="absolute right-8 top-1/2 transform -translate-y-1/2 opacity-20">
-                    <div className="w-32 h-32 bg-white rounded-lg relative">
-                        <div className="absolute bottom-0 left-0 w-2/3 h-3/4 bg-white"></div>
-                        <div className="absolute bottom-0 right-0 w-1/3 h-3/4 bg-gray-400"></div>
-                        <div className="absolute top-0 left-0 right-0 h-1/4 bg-gray-400 rounded-t-lg"></div>
-                    </div>
-                </div>
+
+                {/* Particles */}
+                <div className="absolute top-10 left-10 w-2 h-2 bg-white rounded-full animate-ping"></div>
+                <div className="absolute top-20 right-20 w-1.5 h-1.5 bg-green-200 rounded-full animate-pulse"></div>
+                <div className="absolute bottom-10 left-20 w-1.5 h-1.5 bg-blue-200 rounded-full animate-bounce"></div>
             </div>
 
             {/* Navigation Menu */}

@@ -22,9 +22,9 @@ export const useAuth = () => {
   useEffect(() => {
     // Check if user is logged in (e.g., check localStorage, cookies, etc.)
     const checkAuth = () => {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       const userData = localStorage.getItem('userData');
-      
+
       if (token && userData) {
         try {
           const user = JSON.parse(userData);
@@ -66,16 +66,16 @@ export const useAuth = () => {
 
       if (response.ok) {
         const { user, token } = await response.json();
-        
-        localStorage.setItem('authToken', token);
+
+        localStorage.setItem('token', token);
         localStorage.setItem('userData', JSON.stringify(user));
-        
+
         setAuthState({
           user,
           isAuthenticated: true,
           isLoading: false,
         });
-        
+
         return { success: true };
       } else {
         return { success: false, error: 'Login failed' };
@@ -86,9 +86,9 @@ export const useAuth = () => {
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('token');
     localStorage.removeItem('userData');
-    
+
     setAuthState({
       user: null,
       isAuthenticated: false,
