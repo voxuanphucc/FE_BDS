@@ -1,6 +1,6 @@
 // Environment variables configuration
 export const config = {
-  API_URL: (import.meta as any).env?.VITE_API_URL || 'https://bds-be-g9xi.onrender.com/api',
+  API_URL: (import.meta as any).env?.VITE_API_URL || 'http://localhost:8081/api' || 'https://bds-be-g9xi.onrender.com/api',
   API_TIMEOUT: Number(((import.meta as any).env?.VITE_API_TIMEOUT) || 10000),
 
   // App Configuration

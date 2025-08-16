@@ -5,6 +5,7 @@ import Filter, { FilterData } from "../../components/ui/Filter";
 import { postService } from '../../services/postService';
 import { favoriteService } from '../../services/favoriteService';
 import { PostSummary } from '../../types';
+import Navbar from "../../components/layout/Navbar";
 
 export default function HomePage() {
     const [posts, setPosts] = useState<PostSummary[]>([]);
@@ -113,6 +114,15 @@ export default function HomePage() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    const formatPrice = (price: number): string => {
+        if (price >= 1000000000) {
+            return `${(price / 1000000000).toFixed(1)} tỷ`;
+        } else if (price >= 1000000) {
+            return `${(price / 1000000).toFixed(0)} triệu`;
+        }
+        return price.toLocaleString('vi-VN');
+    };
+
     // Clear filters function
     const handleClearFilters = () => {
         console.log('🧹 Clearing filters');
@@ -170,104 +180,46 @@ export default function HomePage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+            <div className="sticky top-0 z-50 bg-white shadow-md">
+                <Navbar />
+            </div>
             {/* Hero Banner */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-cyan-600 to-green-500 mx-2 mt-6 mb-10 rounded-xl shadow-2xl">
-                {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-48 -translate-y-48"></div>
-                    <div className="absolute bottom-0 right-0 w-80 h-80 bg-white rounded-full translate-x-40 translate-y-40"></div>
-                    <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-white rounded-full opacity-40"></div>
-                </div>
+            <div className="relative overflow-hidden mb-10 shadow-2xl">
+                {/* Banner Image */}
+                <img
+                    src="/banner.png"
+                    alt="Banner"
+                    className="w-full h-[300px] md:h-[400px] object-cover"
+                />
 
-                <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between p-8 lg:p-12">
-                    <div className="flex items-start flex-col max-w-2xl">
-                        {/* Icon với glow */}
-                        <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 mb-6 border border-white/30 shadow-xl">
-                            <svg className="w-12 h-12 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2L2 7v10c0 5.55 3.84 10 9 11 1.94-.34 3.84-1.15 5.55-2.36C19.16 24.65 22 20.2 22 17V7l-10-5z" />
-                                <path d="M12 4.5L4 8.5v8.5c0 4.1 2.84 7.4 6.5 8.3V4.5h1.5z" />
-                            </svg>
-                        </div>
-
-                        {/* Text */}
-                        <h1 className="text-2xl lg:text-5xl  font-bold text-white mb-4 leading-tight">
-                            Tìm Kiếm Bất Động Sản
-                            <span className="block text-2xl lg:text-3xl font-medium text-green-100 mt-2">
-                                Phù Hợp Với Bạn
+                {/* Overlay Text bên trái */}
+                <div className="absolute top-1/2 left-4 md:left-10 transform -translate-y-1/2 z-10">
+                    <div className="bg-white/20 backdrop-blur-md p-4 md:p-6 rounded-xl border border-white/30 shadow-lg max-w-[100%] md:max-w-2xl">
+                        <h1 className="text-xl md:text-2xl lg:text-4xl font-bold text-white leading-tight drop-shadow-md text-center md:text-left">
+                            Khám Phá Không Gian Sống
+                            <span className="block text-lg md:text-xl lg:text-2xl font-medium text-green-100 mt-2">
+                                Được Thiết Kế Dành Riêng Cho Bạn
                             </span>
                         </h1>
-
-                        {/* Search box */}
-                        <div className="mt-6 w-full max-w-md">
-                            <div className="flex bg-white rounded-2xl shadow-lg overflow-hidden">
-                                <input
-                                    type="text"
-                                    placeholder="Nhập địa điểm, dự án hoặc loại BĐS..."
-                                    className="flex-1 px-4 py-3 text-gray-700 outline-none"
-                                />
-                                <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 font-semibold">
-                                    Tìm kiếm
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Decorative Building */}
-                    <div className="hidden lg:block relative mt-10 lg:mt-0">
-                        <div className="w-48 h-48 relative transform rotate-6 hover:rotate-0 transition-transform duration-500">
-                            <div className="absolute bottom-0 left-6 w-10 h-32 bg-white/40 rounded-t-lg backdrop-blur-sm"></div>
-                            <div className="absolute bottom-0 left-20 w-12 h-40 bg-white/50 rounded-t-lg backdrop-blur-sm"></div>
-                            <div className="absolute bottom-0 left-36 w-10 h-36 bg-white/30 rounded-t-lg backdrop-blur-sm"></div>
-
-                            {/* Windows */}
-                            <div className="absolute bottom-6 left-8 w-2 h-2 bg-yellow-300 rounded-sm"></div>
-                            <div className="absolute bottom-10 left-8 w-2 h-2 bg-yellow-300 rounded-sm"></div>
-                            <div className="absolute bottom-14 left-22 w-2 h-2 bg-yellow-300 rounded-sm"></div>
-                            <div className="absolute bottom-18 left-22 w-2 h-2 bg-yellow-300 rounded-sm"></div>
-                        </div>
                     </div>
                 </div>
 
-                {/* Particles */}
+                {/* Particles (giữ nguyên nếu muốn) */}
                 <div className="absolute top-10 left-10 w-2 h-2 bg-white rounded-full animate-ping"></div>
                 <div className="absolute top-20 right-20 w-1.5 h-1.5 bg-green-200 rounded-full animate-pulse"></div>
                 <div className="absolute bottom-10 left-20 w-1.5 h-1.5 bg-blue-200 rounded-full animate-bounce"></div>
+
+                {/* Navigation Menu */}
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
+                    <NavigationMenu />
+                </div>
             </div>
 
-            {/* Navigation Menu */}
-            <div className="mb-10 flex justify-center">
-                <NavigationMenu />
-            </div>
-
-            {/* Filter Section */}
-            <div className="container mx-auto px-4 sm:px-14 lg:px-56 mb-8">
-                <Filter onApply={handleFilterApply} loading={filterLoading} />
-
-                {/* Filter Status & Clear Button */}
-                {currentFilters && (
-                    <div className="mt-4 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <div className="flex items-center space-x-2 text-blue-700">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
-                            </svg>
-                            <span className="text-sm font-medium">
-                                Đang áp dụng bộ lọc - Tìm thấy {posts.length} kết quả
-                            </span>
-                        </div>
-                        <button
-                            onClick={handleClearFilters}
-                            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                            Xóa bộ lọc
-                        </button>
-                    </div>
-                )}
-            </div>
 
             {/* Latest Posts */}
             <div className="container mx-auto px-4 sm:px-14 lg:px-56">
                 <h2 className="text-3xl font-bold mb-8 text-gray-800 flex items-center">
-                    <span className="w-2 h-8 bg-gradient-to-b from-teal-500 to-teal-600 rounded-full mr-3 shadow-sm"></span>
+                    <span className="w-2 h-8 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full mr-3 shadow-sm"></span>
                     {currentFilters ? 'Kết quả tìm kiếm' : 'Tin đăng mới nhất'}
                 </h2>
 
@@ -288,68 +240,103 @@ export default function HomePage() {
                         )}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {posts.map((post) => (
-                            <Link
-                                key={post.id}
-                                to={`/post/${post.id}?from=${currentPageUI > 1 ? `page=${currentPageUI}` : ''}`}
-                                className="bg-white rounded-xl shadow-lg p-2 hover:shadow-xl transition-all duration-300 cursor-pointer block relative transform hover:-translate-y-1 border border-gray-100"
-                            >
-                                <div className="relative mb-3">
-                                    <img
-                                        src={post.thumbnailUrl || "/default-thumbnail.jpg"}
-                                        alt={post.title}
-                                        className="w-full h-32 object-cover rounded-md"
-                                    />
-                                    <div className="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
-                                        {post.postRank === 'DIAMOND'
-                                            ? '🔥 Tin hot'
-                                            : post.postRank === 'GOLD'
-                                                ? '✨ Tin nổi bật'
-                                                : formatRelativeTime(post.createdAt)}
-                                    </div>
-                                </div>
-                                <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2">{post.title}</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {posts.map((post) => {
+                            // Function to convert realEstateType to Vietnamese
+                            const getRealEstateTypeVN = (type) => {
+                                switch (type) {
+                                    case 'LAND':
+                                        return 'Đất';
+                                    case 'APARTMENT':
+                                        return 'Chung cư';
+                                    case 'HOUSE':
+                                        return 'Nhà';
+                                    default:
+                                        return type; // Fallback to original value if not matched
+                                }
+                            };
 
-                                {/* Giá tiền + biểu tượng trái tim */}
-                                <div className="flex items-center justify-between mb-2">
-                                    <p className="text-red-600 font-bold text-sm">
-                                        {post.price < 1_000_000_000
-                                            ? `${Math.round(post.price / 1_000_000)} triệu VNĐ`
-                                            : `${(post.price / 1_000_000_000).toFixed(2)} tỷ VNĐ`}
-                                    </p>
-
-                                    <p className="text-xs text-red-600 font-medium text-center">
-                                        {post.realEstateType} • {post.square}m²
-                                    </p>
-                                    <button
-                                        onClick={(e) => {
-                                            e.preventDefault(); // Ngăn click vào Link
-                                            e.stopPropagation(); // Ngăn lan sự kiện
-                                            handleAddToFavorites(post.id);
-                                        }}
-                                        className="text-red-500 hover:text-red-700"
-                                        title="Thêm vào yêu thích"
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            className="h-6 w-6"
-                                            fill="none"
-                                            color="black"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                            strokeWidth={2}
+                            return (
+                                <Link
+                                    key={post.id}
+                                    to={`/post/${post.id}?${currentPageUI > 1 ? `page=${currentPageUI}` : ''}`}
+                                    className=" shadow-lghover:shadow-xl transition-all duration-300 cursor-pointer block relative transform hover:-translate-y-1 border-spacing-0 border-gray-100"
+                                >
+                                    <div className="relative mb-1">
+                                        <img
+                                            src={post.thumbnailUrl || "/default-thumbnail.jpg"}
+                                            alt={post.title}
+                                            className="w-full h-32 object-cover rounded-sm"
+                                        />
+                                        <div
+                                            className={`absolute bottom-2 left-2 text-white text-xs font-bold px-2 py-1 rounded flex items-center gap-2 ${post.postRank === 'DIAMOND'
+                                                ? 'bg-red-600'
+                                                : post.postRank === 'GOLD'
+                                                    ? 'bg-yellow-500'
+                                                    : 'bg-black bg-opacity-60'
+                                                }`}
                                         >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                            />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </Link>
-                        ))}
+                                            {post.postRank === 'DIAMOND' ? (
+                                                <>
+                                                    {/* 💎 Kim Cương Icon */}
+                                                    <svg className="w- h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M12 2L2 7l10 15 10-15-10-5z" />
+                                                    </svg>
+                                                    <span>VIP</span>
+                                                </>
+                                            ) : post.postRank === 'GOLD' ? (
+                                                <>
+                                                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M12 2l2.9 6.9L22 9.2l-5.5 4.8L18 21l-6-3.5L6 21l1.5-7L2 9.2l7.1-0.3L12 2z" />
+                                                    </svg>
+
+                                                    <span>Gold</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {/* ⏰ Clock Icon */}
+                                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                        <circle cx="12" cy="12" r="10" />
+                                                        <path d="M12 6v6l4 2" />
+                                                    </svg>
+                                                    <span>{formatRelativeTime(post.createdAt)}</span>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <h3 className="text-sm font-semibold text-gray-900 line-clamp-2">{post.title}</h3>
+
+                                    {/* Giá tiền + biểu tượng trái tim */}
+                                    <div className="flex items-center">
+                                        <p className="text-red-600 font-bold text-sm">
+                                            {post.price < 1_000_000_000
+                                                ? `${Math.round(post.price / 1_000_000)} triệu`
+                                                : `${(post.price / 1_000_000_000).toFixed(2)} tỷ`}
+                                        </p>
+                                        {post.square && post.price && (
+                                            <div className="flex justify-between text-xs ml-8">
+                                                <span className="text-red-600 font-bold">
+                                                    {formatPrice(post.price / post.square)}/m²
+                                                </span>
+                                            </div>
+                                        )}
+
+
+                                    </div>
+                                    <div className="max-w-full w-full flex gap-10">
+                                        <p className="text-xs text-red-600 font-medium text-center">
+                                            {getRealEstateTypeVN(post.realEstateType)}
+                                        </p>
+                                        <p className="text-xs text-right text-red-600 font-medium ">
+                                            {post.square}m²
+                                        </p>
+
+                                    </div>
+
+                                </Link>
+                            );
+                        })}
                     </div>
                 )}
 

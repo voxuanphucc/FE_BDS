@@ -1,5 +1,9 @@
 export interface Post {
   id: string;
+  userId: string;
+  phone: string;
+  userName: string;
+  avatarUrl: string;
   postRank: string;
   postType: string;
   thumbnailUrl: string;
@@ -24,7 +28,7 @@ export interface Post {
   rooftop: boolean;
   carPark: boolean;
   owner?: boolean;
-  imageUrls?: string[] | null;
+  imageUrls?: string[];
 }
 
 export interface PostSummary {

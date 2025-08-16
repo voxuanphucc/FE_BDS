@@ -115,7 +115,7 @@ const Filter: React.FC<FilterProps> = ({ onApply, loading = false }) => {
   };
 
   return (
-    <div ref={filterRef} className="flex items-center space-x-3 overflow-auto flex-nowrap py-2 px-4 sm:px-0">
+    <div ref={filterRef} className="flex items-center space-x-3 sticky flex-nowrap py-2 px-4 sm:px-0">
       {/* Filter Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}

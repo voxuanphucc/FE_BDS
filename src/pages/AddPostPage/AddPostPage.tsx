@@ -107,7 +107,6 @@ const AddPostPage: React.FC = () => {
                 thumbnailUrl: prev.thumbnailUrl || newImageUrls[0] || ''
             }));
 
-            alert(`Đã upload thành công ${uploadResults.length} ảnh!`);
         } catch (error) {
             console.error('Upload error:', error);
             alert('Có lỗi xảy ra khi upload ảnh. Vui lòng thử lại.');

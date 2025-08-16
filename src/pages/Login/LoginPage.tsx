@@ -7,7 +7,7 @@ const LoginPage = () => {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-
+    const navigate = useNavigate();
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
@@ -20,6 +20,7 @@ const LoginPage = () => {
             if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
 
             alert('Đăng nhập thành công!');
+            navigate('/home');
             window.location.reload();
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Lỗi không xác định';
